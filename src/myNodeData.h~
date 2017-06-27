@@ -1,0 +1,5 @@
+ class myNodeData_t : public IloCplex::BranchCallbackI::NodeData {
+public:
+  FixVarInfo_t *NodeDataPtr; //pointer to FixVarInfo
+  myNodeData_t (FixVarInfo_t *p) : NodeDataPtr(p) {};
+};

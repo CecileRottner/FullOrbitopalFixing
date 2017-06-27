@@ -185,6 +185,7 @@ public :
 
     void update(int varID, myNodeData* data) ;
     void computeValuesU() ;
+    void getVar(int varID, int & unit, int & time, int & varX) ;
 
     int setXmin() ;
     int setXmax() ;

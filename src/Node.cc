@@ -190,6 +190,21 @@ SubPb::SubPb(IloEnv env, InstanceUCP* inst, IloBoolVarArray xx, IloBoolVarArray 
 }
 
 
+void SubPb::getVar(int varID, int & unit, int & time, int & varX) {
+
+    int nX = n*T ;
+    int var=varID ;
+    varX = 1 ;
+
+    if (varID >= nX ) { // une variable u(i,t) est fixée
+        var -= nX ;
+        varX=0 ;
+    }
+
+    time = var % T ;
+    unit = (var - time)/ T ;
+}
+
 void SubPb::update(int varID, myNodeData* data) {
     prune=0 ;
 

@@ -31,6 +31,8 @@ ILOBRANCHCALLBACK4(BCallBack, Methode &, methode, SubPb &, sub, myNodeData*, dat
 
     if (nBranches > 0 && !methode.EmptyBranchCB() ) {
 
+        int T = sub.T ;
+
         start = clock();
 
         if (nBranches >2) {
@@ -48,22 +50,11 @@ ILOBRANCHCALLBACK4(BCallBack, Methode &, methode, SubPb &, sub, myNodeData*, dat
 
         int varID = vars[0].getId() ;
 
-        int T=sub.T ;
-        int nX = sub.n*sub.T ;
-        int var=varID ;
-        int varX = 1 ;
-        int varP = 0 ;
+        int unit;
+        int time;
+        int varX ;
+        sub.getVar(varID, unit, time, varX) ;
 
-        if (varID >= nX ) { // une variable u(i,t) est fixée
-            var -= nX ;
-            varX=0 ;
-        }
-        if (var >= nX) {
-            var -= nX ;
-            varP=1 ;
-        }
-        int time = var % sub.T ;
-        int unit = (var - time)/ sub.T ;
 
 
 

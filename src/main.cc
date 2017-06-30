@@ -56,8 +56,6 @@ ILOBRANCHCALLBACK4(BCallBack, Methode &, methode, SubPb &, sub, myNodeData*, dat
         sub.getVar(varID, unit, time, varX) ;
 
 
-
-
         //////////// Mise à jour de nodeData (ordre des variables) /////////////
         if (getNnodes() != 0 && methode.DynamicFixing() ) { // si on est à la racine, pas de data dans le noeud courant, data est "vide. // si on utilise une methode à ordre fixe on peut garder le même nodeData tout le long
             data = dynamic_cast <myNodeData *> (getNodeData()) ; // sinon on récupère le nodeData du noeud courant
@@ -106,23 +104,36 @@ ILOBRANCHCALLBACK4(BCallBack, Methode &, methode, SubPb &, sub, myNodeData*, dat
 
         if ( methode.StaticFixing() || methode.DynamicFixing() ) { // fixing
 
-            if ( !methode.DemandBranching() ) {
+            if ( !methode.SpecialBranching() ) {
 
-            // Fixing avec branchement cplex (static ou dynamic)
-            getBranch(branch.varLeft, branch.bLeft, branch.dirLeft, 0) ;
-            getBranch(branch.varRight, branch.bRight, branch.dirRight, 1) ;
-            sub.doFixing(branch, pruneLeft, pruneRight, getNnodes()) ;
+                // Fixing avec branchement cplex (static ou dynamic)
+                getBranch(branch.varLeft, branch.bLeft, branch.dirLeft, 0) ;
+                getBranch(branch.varRight, branch.bRight, branch.dirRight, 1) ;
+                sub.doFixing(branch, pruneLeft, pruneRight, getNnodes()) ;
             }
 
             else {
-                int newVar = sub.newVarFromDemand(branch, getNnodes()) ;
+                int newVar = 0 ;
+                if (getNnodes() < methode.StopNode ) {
+
+                    getValues(sub.x_frac,sub.x);
+                    if (methode.allGroups) {
+                        newVar = sub.newVarFromFractionalGroup(branch, getNnodes()) ;
+                    }
+                    else  {
+                        newVar = sub.newVarFromSymmetryGroup(branch, getNnodes()) ;
+                }
                 if (!newVar) { // la variable choisie par cplex est conservée
                     getBranch(branch.varLeft, branch.bLeft, branch.dirLeft, 0) ;
                     getBranch(branch.varRight, branch.bRight, branch.dirRight, 1) ;
                 }
+
                 sub.doFixing(branch, pruneLeft, pruneRight, getNnodes()) ;
+
             }
         }
+
+
 
 
         int print = 0 ; //que pour le fixing dynamic
@@ -338,6 +349,27 @@ main(int argc,char**argv)
     StaticFix.AddIneqSum() ;
     StaticFix.DontUseLazyCB();
 
+    Methode StaticFixWithBranching ;
+    StaticFixWithBranching.UseStaticFixing() ;
+    StaticFixWithBranching.AddIneqSum() ;
+    StaticFixWithBranching.DontUseLazyCB();
+    StaticFixWithBranching.UseSpecialBranching();
+
+    Methode StaticFixWithBranching_50 ;
+    StaticFixWithBranching_50.UseStaticFixing() ;
+    StaticFixWithBranching_50.AddIneqSum() ;
+    StaticFixWithBranching_50.DontUseLazyCB();
+    StaticFixWithBranching_50.UseSpecialBranching();
+    StaticFixWithBranching_50.StopNode = 50;
+
+
+    Methode StaticFixWithBranching_all ;
+    StaticFixWithBranching_all.UseStaticFixing() ;
+    StaticFixWithBranching_all.AddIneqSum() ;
+    StaticFixWithBranching_all.DontUseLazyCB();
+    StaticFixWithBranching_all.UseSpecialBranching();
+    StaticFixWithBranching_all.allGroups=1 ;
+
     Methode DynamicFix ;
     DynamicFix.UseDynamicFixing() ;
 
@@ -363,7 +395,39 @@ main(int argc,char**argv)
         InstanceProcessed Instance = InstanceProcessed(n, T, bloc, demande, sym, cat01, intra, id, localisation) ;
 
         double time = 0 ;
+        IloEnv env ;
 
+        /*env=IloEnv() ;
+        process(Instance, fichier, time, DefaultCplex, env) ;
+        env.end() ;
+
+        env=IloEnv() ;
+        process(Instance, fichier, time, IneqPures, env) ;
+        env.end() ;
+
+        env=IloEnv() ;
+        process(Instance, fichier, time, IneqCB, env) ;
+        env.end() ;
+
+        env=IloEnv() ;
+        process(Instance, fichier, time, StaticFix, env) ;
+        env.end() ;*/
+
+        env=IloEnv() ;
+        process(Instance, fichier, time, StaticFixWithBranching, env) ;
+        env.end() ;
+
+
+        env=IloEnv() ;
+        process(Instance, fichier, time, StaticFixWithBranching_50, env) ;
+        env.end() ;
+
+
+        env=IloEnv() ;
+        process(Instance, fichier, time, StaticFixWithBranching_all, env) ;
+        env.end() ;
+
+        fichier << endl ;
 
 
         fichier << endl ;
@@ -403,12 +467,12 @@ main(int argc,char**argv)
         Instance.T=T ;
         IloEnv env ;
 
-        for (sym= 4 ; sym >= 2; sym--) {
+        for (sym= 2 ; sym <= 4 ; sym++) {
             Instance.symetrie = sym ;
-            for (int id=9; id <=20; id++) {
+            for (int id=1; id <=20; id++) {
                 Instance.id = id ;
 
-                env=IloEnv() ;
+                /*env=IloEnv() ;
                 process(Instance, fichier, time, DefaultCplex, env) ;
                 env.end() ;
 
@@ -418,10 +482,20 @@ main(int argc,char**argv)
 
                 env=IloEnv() ;
                 process(Instance, fichier, time, IneqCB, env) ;
-                env.end() ;
+                env.end() ;*/
 
                 env=IloEnv() ;
-                process(Instance, fichier, time, StaticFix, env) ;
+                process(Instance, fichier, time, StaticFixWithBranching, env) ;
+                env.end() ;
+
+
+                env=IloEnv() ;
+                process(Instance, fichier, time, StaticFixWithBranching_50, env) ;
+                env.end() ;
+
+
+                env=IloEnv() ;
+                process(Instance, fichier, time, StaticFixWithBranching_all, env) ;
                 env.end() ;
 
                 fichier << endl ;

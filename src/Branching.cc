@@ -14,6 +14,145 @@
 #include "Node.h"
 
 
+int SubPb::newVarFromFractionalGroup(Branching & branch, int nodes) {
+
+    int new_time=-1 ;
+    int new_unit=-1 ;
+
+    int distance = 1 ;
+
+    for (int g=0 ; g < nbG ; g++) {
+
+        int first = FirstG[g];
+
+        for (int t=0 ; t< T ; t++) {
+            int val = 0 ;
+            for (int i = first ; i <= LastG[g] ; i++) {
+                val += x_frac[i*T+t] ;
+            }
+
+            int IntPart = floor(val) ;
+            int FracPart = val - IntPart ;
+
+            if (fabs(FracPart - 0.5) < distance) {
+
+                int possibleUnit= first + IntPart ;
+
+                if (feasible[possibleUnit*T+t] !=2) {
+                    new_unit=possibleUnit ;
+                    new_time=t ;
+
+                    distance =fabs(FracPart - 0.5) ;
+                }
+
+                else {
+                    for (int i = first ; i <= LastG[g] ; i++) {
+
+                        if (feasible[i*T+t] != 2) {
+                            new_unit=i ;
+                            new_time=t ;
+                            distance = fabs(FracPart - 0.5) ;
+                        }
+                    }
+                }
+            }
+
+        }
+    }
+
+    if (new_unit<0) {
+        return 0 ;
+    }
+
+
+    unit = new_unit ;
+    time = new_time ;
+    (branch.varLeft).add( x[unit*T+time] ) ;
+    //bound
+    (branch.bLeft).add( 1 ) ;
+    //direction
+    (branch.dirLeft).add( IloCplex::BranchUp) ;
+
+    //coté droit
+    //variable
+    (branch.varRight).add( x[unit*T+time] );
+    //bound
+    (branch.bRight).add(0) ;
+    //direction
+    (branch.dirRight).add(IloCplex::BranchDown) ;
+    return 1 ;
+
+}
+
+
+int SubPb::newVarFromSymmetryGroup(Branching & branch, int nodes) {
+
+    int new_time=-1 ;
+    int new_unit=-1 ;
+
+    int g = Group[unit] ;
+    int first = FirstG[g];
+
+    int distance = 1 ;
+    for (int t=0 ; t< T ; t++) {
+        int val = 0 ;
+        for (int i = first ; i <= LastG[g] ; i++) {
+            val += x_frac[i*T+t] ;
+        }
+
+        int IntPart = floor(val) ;
+        int FracPart = val - IntPart ;
+
+        if (fabs(FracPart - 0.5) < distance) {
+
+            int possibleUnit= first + IntPart ;
+
+            if (feasible[possibleUnit*T+t] !=2) {
+                new_unit=possibleUnit ;
+                new_time=t ;
+
+                distance =fabs(FracPart - 0.5) ;
+            }
+
+            else {
+                for (int i = first ; i <= LastG[g] ; i++) {
+
+                    if (feasible[i*T+t] !=2) {
+                        new_unit=i ;
+                        new_time=t ;
+                        distance =fabs(FracPart - 0.5) ;
+                    }
+                }
+            }
+        }
+
+    }
+
+    if (new_unit<0) {
+        return 0 ;
+    }
+
+
+    unit = new_unit ;
+    time = new_time ;
+    (branch.varLeft).add( x[unit*T+time] ) ;
+    //bound
+    (branch.bLeft).add( 1 ) ;
+    //direction
+    (branch.dirLeft).add( IloCplex::BranchUp) ;
+
+    //coté droit
+    //variable
+    (branch.varRight).add( x[unit*T+time] );
+    //bound
+    (branch.bRight).add(0) ;
+    //direction
+    (branch.dirRight).add(IloCplex::BranchDown) ;
+    return 1 ;
+
+}
+
+
 int SubPb::newFeasibleVar(Branching & branch, int nodes) {
 
     cout << "unit : " << unit << endl ;

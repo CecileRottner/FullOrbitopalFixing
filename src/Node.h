@@ -197,6 +197,8 @@ public :
     int newVarUW(Branching & branch, int nodes) ;
     int newFeasibleVar(Branching & branch, int nodes ) ;
     int newVarFromDemand(Branching & branch, int nodes) ;
+    int newVarFromSymmetryGroup(Branching & branch, int nodes) ;
+    int newVarFromFractionalGroup(Branching & branch, int nodes) ;
 
 };
 

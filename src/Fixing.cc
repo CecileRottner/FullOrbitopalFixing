@@ -435,6 +435,7 @@ void SubPb::doFixing(Branching & branch, int & pruneLeft, int & pruneRight, int 
     int pruneSide1 = doFixing_side(branch, 1) ; // fixe le côté var=1
 
     int left = 0 ; // left = 1 si c'est la variable de gauche qui est à 1, 0 sinon
+
     if (branch.bLeft[0] == 1) {
         left = 1 ;
     }

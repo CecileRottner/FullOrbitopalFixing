@@ -35,11 +35,14 @@ private:
     int UseEmptyBranchCallback ;
     int UseCutCallback ;
 
-    int doDemandBranching ; // méthode de branchement sur basant sur les pics de demande
+    int doSpecialBranching ; // méthode de branchement sur basant sur les pics de demande
 
     int useNumU ; //u definie comme variable continue dans le modèle
 
 public:
+
+    int allGroups ;
+    int StopNode ;
 
     //Constructeur (par défault c'est Cplex Default)
     Methode() {// crée Cplex default
@@ -55,9 +58,14 @@ public:
         doIneqVarY = 0;
         doStaticFixing = 0;
         doDynamicFixing = 0;
-        doDemandBranching = 0 ;
+        doSpecialBranching = 0 ;
         useNumU = 0 ;
         doMob = 0 ;
+
+        //indicateurs à l'arrache
+        StopNode=10 ;
+        allGroups=0 ;
+
     }
 
 
@@ -135,10 +143,10 @@ public:
         UseCutCallback= 1 ;
     }
 
-    void UseDemandBranching() {
+    void UseSpecialBranching() {
         UseBranchCallback = 1 ;
         stickToCplexFirstBranchingDecision=0 ; // pas forcément nécessaire en DemandBranching seul, mais peu d'intérêt sans
-        doDemandBranching = 1 ;
+        doSpecialBranching = 1 ;
     }
 
 
@@ -154,7 +162,7 @@ public:
     int LazyCB() {return UseLazyCallback;}
     int BranchCB() {return UseBranchCallback;}
     int CutCB() {return UseCutCallback;}
-    int DemandBranching() {return doDemandBranching;}
+    int SpecialBranching() {return doSpecialBranching;}
     int StickToBranchingDecision() {return stickToCplexFirstBranchingDecision;}
     int NumU() {return useNumU;}
     int EmptyBranchCB() {return UseEmptyBranchCallback;}

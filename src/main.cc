@@ -122,6 +122,7 @@ ILOBRANCHCALLBACK4(BCallBack, Methode &, methode, SubPb &, sub, myNodeData*, dat
                     }
                     else  {
                         newVar = sub.newVarFromSymmetryGroup(branch, getNnodes()) ;
+                    }
                 }
                 if (!newVar) { // la variable choisie par cplex est conservée
                     getBranch(branch.varLeft, branch.bLeft, branch.dirLeft, 0) ;
@@ -132,8 +133,6 @@ ILOBRANCHCALLBACK4(BCallBack, Methode &, methode, SubPb &, sub, myNodeData*, dat
 
             }
         }
-
-
 
 
         int print = 0 ; //que pour le fixing dynamic
@@ -219,8 +218,6 @@ ILOBRANCHCALLBACK4(BCallBack, Methode &, methode, SubPb &, sub, myNodeData*, dat
 
         sub.timeFix += ( clock() - start ) / (double) CLOCKS_PER_SEC;
     }
-
-
 
 
 }

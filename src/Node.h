@@ -199,6 +199,7 @@ public :
     int newVarFromDemand(Branching & branch, int nodes) ;
     int newVarFromSymmetryGroup(Branching & branch, int nodes) ;
     int newVarFromFractionalGroup(Branching & branch, int nodes) ;
+    int newVarSameTimePeriod(Branching & branch, int nodes) ;
 
 };
 

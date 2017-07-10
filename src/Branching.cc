@@ -152,6 +152,66 @@ int SubPb::newVarFromSymmetryGroup(Branching & branch, int nodes) {
 
 }
 
+int SubPb::newVarSameTimePeriod(Branching & branch, int nodes) {
+
+
+    int new_unit=-1 ;
+
+    int distance = 1 ;
+    for (int g=0 ; g < nbG  ; g++) {
+
+        int val = 0 ;
+        for (int i = FirstG[g] ; i <= LastG[g] ; i++) {
+            val += x_frac[i*T+time] ;
+        }
+
+        int IntPart = floor(val) ;
+        int FracPart = val - IntPart ;
+
+        if (fabs(FracPart - 0.5) < distance) {
+
+            int possibleUnit = FirstG[g] + IntPart ;
+
+            if (feasible[possibleUnit*T+time] !=2) {
+                new_unit=possibleUnit ;
+                distance =fabs(FracPart - 0.5) ;
+            }
+
+            else {
+                for (int i =FirstG[g]  ; i <= LastG[g] ; i++) {
+                    if (feasible[i*T+time] !=2) {
+                        new_unit=i ;
+                        distance =fabs(FracPart - 0.5) ;
+                    }
+                }
+            }
+        }
+    }
+
+    if (new_unit<0) {
+        return 0 ;
+    }
+
+
+    unit = new_unit ;
+
+    (branch.varLeft).add( x[unit*T+time] ) ;
+    //bound
+    (branch.bLeft).add( 1 ) ;
+    //direction
+    (branch.dirLeft).add( IloCplex::BranchUp) ;
+
+    //coté droit
+    //variable
+    (branch.varRight).add( x[unit*T+time] );
+    //bound
+    (branch.bRight).add(0) ;
+    //direction
+    (branch.dirRight).add(IloCplex::BranchDown) ;
+    return 1 ;
+
+}
+
 
 int SubPb::newFeasibleVar(Branching & branch, int nodes) {
 

@@ -121,7 +121,7 @@ ILOBRANCHCALLBACK4(BCallBack, Methode &, methode, SubPb &, sub, myNodeData*, dat
                         newVar = sub.newVarFromFractionalGroup(branch, getNnodes()) ;
                     }
                     else  {
-                        newVar = sub.newVarFromSymmetryGroup(branch, getNnodes()) ;
+                        newVar = sub.newVarSameTimePeriod(branch, getNnodes()) ;
                     }
                 }
                 if (!newVar) { // la variable choisie par cplex est conservée
@@ -415,19 +415,17 @@ main(int argc,char**argv)
         env.end() ;
 
 
-        env=IloEnv() ;
+     /*   env=IloEnv() ;
         process(Instance, fichier, time, StaticFixWithBranching_50, env) ;
         env.end() ;
 
 
         env=IloEnv() ;
         process(Instance, fichier, time, StaticFixWithBranching_all, env) ;
-        env.end() ;
+        env.end() ; */
 
         fichier << endl ;
 
-
-        fichier << endl ;
 
     }
 

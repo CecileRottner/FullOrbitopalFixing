@@ -24,7 +24,6 @@ ILOSTLBEGIN
 
 ILOBRANCHCALLBACK4(BCallBack, Methode &, methode, SubPb &, sub, myNodeData*, data, int, count) {
 
-
     clock_t start;
 
     int nBranches = getNbranches() ;
@@ -328,7 +327,7 @@ main(int argc,char**argv)
     Methode DefaultCplex ;
 
     Methode CBCplex ;
-    CBCplex.CplexCallback(1,0,1,0);
+    CBCplex.CplexCallback(1,1,1,0);
 
     Methode IneqPures;
     IneqPures.UseIneqSum();
@@ -340,11 +339,18 @@ main(int argc,char**argv)
     IneqCB.UseEmptyBranchCB() ;
     IneqCB.setNum(0) ;
 
+    Methode Mob ;
+    Mob.useMOB() ;
 
     Methode StaticFix ;
     StaticFix.UseStaticFixing() ;
-    StaticFix.AddIneqSum() ;
-    StaticFix.DontUseLazyCB();
+    //StaticFix.AddIneqSum() ;
+    //StaticFix.DontUseLazyCB();
+
+    Methode StaticFixWithIneq ;
+    StaticFixWithIneq.UseStaticFixing() ;
+    StaticFixWithIneq.AddIneqSum() ;
+    StaticFixWithIneq.DontUseLazyCB();
 
     Methode StaticFixWithBranching ;
     StaticFixWithBranching.UseStaticFixing() ;
@@ -394,11 +400,32 @@ main(int argc,char**argv)
         double time = 0 ;
         IloEnv env ;
 
-        /*env=IloEnv() ;
-        process(Instance, fichier, time, DefaultCplex, env) ;
-        env.end() ;
+        if (met==1) {
 
-        env=IloEnv() ;
+            env=IloEnv() ;
+            process(Instance, fichier, time, StaticFix, env) ;
+            env.end() ;
+
+            env=IloEnv() ;
+            process(Instance, fichier, time, DynamicFix, env) ;
+            env.end() ;
+        }
+
+        if (met==2) {
+            env=IloEnv() ;
+            process(Instance, fichier, time, DefaultCplex, env) ;
+            env.end() ;
+
+            env=IloEnv() ;
+            process(Instance, fichier, time, IneqPures, env) ;
+            env.end() ;
+
+            env=IloEnv() ;
+            process(Instance, fichier, time, StaticFixWithIneq, env) ;
+            env.end() ;
+        }
+
+        /*env=IloEnv() ;
         process(Instance, fichier, time, IneqPures, env) ;
         env.end() ;
 
@@ -410,12 +437,12 @@ main(int argc,char**argv)
         process(Instance, fichier, time, StaticFix, env) ;
         env.end() ;*/
 
-        env=IloEnv() ;
+        /* env=IloEnv() ;
         process(Instance, fichier, time, StaticFixWithBranching, env) ;
-        env.end() ;
+        env.end() ;*/
 
 
-     /*   env=IloEnv() ;
+        /*   env=IloEnv() ;
         process(Instance, fichier, time, StaticFixWithBranching_50, env) ;
         env.end() ;
 

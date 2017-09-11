@@ -185,27 +185,27 @@ IloModel defineModel_sum(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x,
             if (i < last) {
                 for (int t = l ; t < T ; t++) {
 
-					IloExpr rhs(env) ;
-					rhs += x[i*T+t] + x[i*T+t - l];
+                    IloExpr rhs(env) ;
+                    rhs += x[i*T+t] + x[i*T+t - l];
 
-					for (k=t -l + 1 ; k < t ; k++) {
-						rhs+= u[i*T+k] ;
-					}
+                    for (k=t -l + 1 ; k < t ; k++) {
+                        rhs+= u[i*T+k] ;
+                    }
 
-					if (methode==5)  {
-						if (t< T-1) {
-							rhs+= 1 - x[i*T+t+1] ;
-							for (k=t + 2 ; k < fmin(T,t+L) ; k++) {
-								rhs+= x[i*T+k-1] - x[i*T+k] + u[i*T+k] ;
+                    if (methode==5)  {
+                        if (t< T-1) {
+                            rhs+= 1 - x[i*T+t+1] ;
+                            for (k=t + 2 ; k < fmin(T,t+L) ; k++) {
+                                rhs+= x[i*T+k-1] - x[i*T+k] + u[i*T+k] ;
 
-							}
-						}
+                            }
+                        }
 
-							/*for (k=t + 1 ; k < fmin(T,t+L+l) ; k++) {
-								rhs+= x[i*T+k-1] - x[i*T+k] + u[i*T+k] ;
+                        /*for (k=t + 1 ; k < fmin(T,t+L+l) ; k++) {
+                                                                rhs+= x[i*T+k-1] - x[i*T+k] + u[i*T+k] ;
 
-							}*/
-					}
+                                                        }*/
+                    }
 
                     int ub_j = i+1 ;
                     if (methode == -4) {
@@ -227,17 +227,17 @@ IloModel defineModel_sum(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x,
 
                     for (k=t -L + 1 ; k < t ; k++) {
                         rhs_w += x[i*T + k-1] - x[i*T+k] + u[i*T+k] ;
-					}
+                    }
 
-					if (methode==5)  {
-						if (t< T-1) {
-							rhs_w +=x[i*T+t+1];
-							for (k=t + 2 ; k < fmin(t+l,T) ; k++) {
-								rhs_w += u[i*T+k] ;
-							}
-						}
-					}
-					
+                    if (methode==5)  {
+                        if (t< T-1) {
+                            rhs_w +=x[i*T+t+1];
+                            for (k=t + 2 ; k < fmin(t+l,T) ; k++) {
+                                rhs_w += u[i*T+k] ;
+                            }
+                        }
+                    }
+
                     int lb_j = i-1 ;
                     if (methode == -4) {
                         lb_j=first ;

@@ -1,5 +1,5 @@
-#ifndef PROCESSBORDEL
-#define PROCESSBORDEL
+#ifndef PROCESSS
+#define PROCESSS
 
 #include <ilcplex/ilocplex.h>
 #include <ilcplex/ilocplexi.h>

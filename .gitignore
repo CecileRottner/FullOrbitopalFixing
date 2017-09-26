@@ -1,2 +1,6 @@
 *.o
 mf
+Makefile
+cplex.mk
+result.txt
+

@@ -1,6 +1,5 @@
 *.o
 mf
-Makefile
-cplex.mk
+cplex_dir.mk
 result.txt
-
+src/main.cc~

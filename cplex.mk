@@ -86,11 +86,14 @@
 #      Local configuration
 # ---------------------------------------------------------------------
 
+
+include cplex_dir.mk
+
 CPLEX_SYSTEM     ?= x86-64_linux
 CPLEX_LIBFORMAT  ?= static_pic
-CPLEX_BASE_DIR   ?= /logiciels/cplex/linux/x86/cplex-126/
 
-#CPLEX_BASE_DIR   = /logiciels/ilog/cplex_studio12.4
+
+
 
 # ---------------------------------------------------------------------
 

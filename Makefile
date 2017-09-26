@@ -14,8 +14,7 @@ VPATH += src
 
 #  CPLEX configuration
 
-#CPLEX_BASE_DIR := /home/rottner/Programmes/Cplex12.7/
-CPLEX_BASE_DIR := /home/rottner/Programmes/Cplex/
+
 #CPLEX_BASE_DIR := /usr/ensta/pack/ro/cplex/x86_64-linux/CPLEX_Studio_126
 
 
@@ -48,16 +47,16 @@ include cplex.mk
 #  'patsubst' functions we saw in class (or, again,
 #  google 'makefile wildcard' for example), although
 #  I would advise you against it. (In particular
-#  because it can be useful to compile only a part of your
+#  because it can be usefull to compile only a part of your
 #  project when you have build errors.)
 
 OBJ_LIST := InstanceUCP.o \
-	    Process.o \
 	    ModeleUCP.o \
+	    Branching.o \
 	    Node.o \
 	    Mob.o \
 	    Fixing.o \
-	    Branching.o \
+            Process.o \
 	    main.o \
 
 #  The list of the path to the object files: since
@@ -124,11 +123,12 @@ mrproper: clean
 #   you to just carefully write all your depandancies
 #   by hand.
 
-build/Process.o : Process.h
+
 build/InstanceUCP.o   : InstanceUCP.h
 build/ModeleUCP.o : InstanceUCP.h ModeleUCP.h
-build/Node.o : Node.h Process.h InstanceUCP.h
+build/Branch.o : Node.h InstanceUCP.h
+build/Node.o : Node.h InstanceUCP.h
 build/Mob.o : Mob.h Node.h
-build/Fixing.o : Node.h InstanceUCP.h ModeleUCP.h
-build/Branching.o : Node.h InstanceUCP.h ModeleUCP.h
-build/main.o      :  Process.h InstanceUCP.h ModeleUCP.h Node.h Mob.h
+build/Fixing.o : Fixing.h Node.h
+build/Process.o : Process.h InstanceUCP.h ModeleUCP.h
+build/main.o      : InstanceUCP.h ModeleUCP.h Node.h Fixing.h Process.h Mob.h

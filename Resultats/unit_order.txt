@@ -1,7 +1,7 @@
 -1: Cplex default avec ordre des unités quelconque (venant de l'instance)
 0: Cplex callback avec ordre des unités quelconque (venant de l'instance)
 -1: Cplex default avec unités triées par Pmax décroissant
-0: Cplex callback avec unités triées par Pmax décroissant
+0: Cplex callback (sans lazy) avec unités triées par Pmax décroissant
 
 -1 & 60 & 48 & 4 & 7 & 14 & 8.14286 & 1 & 5.7767e+06 & 0 \%  & 0 & 0 & 0 & 0.38 \\ 
 0 & 60 & 48 & 4 & 7 & 14 & 8.14286 & 1 & 5.7767e+06 & 0 \%  & 0 & 0 & 0 & 0.53 \\ 

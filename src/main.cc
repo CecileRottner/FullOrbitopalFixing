@@ -249,6 +249,10 @@ int process(InstanceProcessed I, ofstream & fichier, double & time, Methode met,
     else if (met.IneqSum()) {
         model = defineModel_sum(env,inst, x,u, -3) ;
     }
+
+    else if (met.AggregatedModel()) {
+        model = AggregatedModel(env, inst) ;
+    }
     else {
         model = defineModel(env,inst,x,u,met.NumU()) ;
     }
@@ -334,6 +338,9 @@ main(int argc,char**argv)
 
     Methode IneqVarY;
     IneqVarY.UseIneqVarY();
+
+    Methode AggregModel;
+    AggregModel.UseAggregatedModel();
 
     Methode IneqCB ;
     IneqCB.UseIneqSum() ;
@@ -497,11 +504,11 @@ main(int argc,char**argv)
             for (int id=1; id <=20; id++) {
                 Instance.id = id ;
 
-                /*env=IloEnv() ;
-                process(Instance, fichier, time, DefaultCplex, env) ;
-                env.end() ;*/
                 env=IloEnv() ;
-                process(Instance, fichier, time, CBCplex, env) ;
+                process(Instance, fichier, time, DefaultCplex, env) ;
+                env.end() ;
+                env=IloEnv() ;
+                process(Instance, fichier, time, AggregModel, env) ;
                 env.end() ;
 
                 /*env=IloEnv() ;

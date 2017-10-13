@@ -35,6 +35,8 @@ void InstanceUCP::Initialise() {
     LastG_ = IloIntArray(env, nbG) ;
     LastG = IloIntArray(env, nbG) ;
 
+
+
     Group = IloIntArray(env, n) ;
 
     int nb =0 ;
@@ -121,6 +123,8 @@ void InstanceUCP::Initialise() {
 
     //Calcul des indicateurs de symétries
 
+    SizeG = IloIntArray(env, nbG) ;
+
     repartition_tailles = IloIntArray(env, n) ;
     for (int i=0 ; i <n ; i++) {
         repartition_tailles[i] = 0 ;
@@ -130,8 +134,10 @@ void InstanceUCP::Initialise() {
     MeanSize = 0 ;
     nbG2 = 0 ;
 
+
     int groupSize = 0 ;
 
+    int group_ind=0 ;
 
     for (int i = 0 ; i <n ; i++) {
 
@@ -144,6 +150,7 @@ void InstanceUCP::Initialise() {
         else {
             groupSize++ ;
             repartition_tailles[groupSize]++ ;
+            SizeG[group_ind] = groupSize ;
             if (!First[i]) {
                 MeanSize+=groupSize ;
                 if (MaxSize < groupSize) {
@@ -151,9 +158,12 @@ void InstanceUCP::Initialise() {
                 }
             }
             groupSize = 0 ;
+            group_ind++;
         }
     }
 
+    cout << "First : " << First << endl ;
+    cout << "Size : " << SizeG << endl ;
     MeanSize = MeanSize / nbG2;
 
 
@@ -605,6 +615,13 @@ IloNum InstanceUCP::getLastG(IloInt i) {
         cout << "Attention, LastG[" << i << "] n'existe pas." << endl ;
     }
     return LastG[i] ;
+}
+
+IloNum InstanceUCP::getSizeG(IloInt g) {
+    if ((g >= nbG)||(g < 0)) {
+        cout << "Attention, SizeG[" << g << "] n'existe pas." << endl ;
+    }
+    return SizeG[g] ;
 }
 
 IloNum InstanceUCP::getordreT(IloInt t) {

@@ -38,6 +38,7 @@ public:
 
     IloIntArray FirstG ; // tableau des premiers éléments de chaque groupe
     IloIntArray LastG ;
+    IloIntArray SizeG ;
     IloIntArray Group ; //group[i] = numéro du groupe de symétrie de l'unité i
     int nbG ; //nb de groupes en comptant les unités seules
     int nbG2 ; //nb de groupes de taille >= 2
@@ -131,6 +132,7 @@ public:
     IloNum getLast(IloInt i);
     IloNum getFirstG(IloInt i);
     IloNum getLastG(IloInt i);
+    IloNum getSizeG(IloInt g);
     IloNum getGroup(IloInt i);
     IloNum getordreT(IloInt t) ;
 

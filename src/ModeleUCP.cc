@@ -253,3 +253,119 @@ IloModel defineModel_sum(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x,
     return model ;
 }
 
+IloModel AggregatedModel(IloEnv env, InstanceUCP* pb) {
+
+    IloModel model = IloModel(env);
+
+    int n = pb->getn();
+    int T = pb->getT() ;
+    int nbG = pb->getnbG() ;
+
+    IloInt t ;
+    IloInt i ;
+    IloInt k ;
+
+
+
+    IloNumVarArray pp(env, nbG*T, 0.0, 10000);
+    IloIntVarArray xx(env, nbG*T, 0, n);
+    IloIntVarArray uu(env, nbG*T, 0, n);
+
+    for (t=0 ; t < T ; t++) {
+        for (int g=0; g<nbG; g++) {
+            model.add(xx[g*T+t] <= pb->getSizeG(g)) ;
+            model.add(uu[g*T+t] <= pb->getSizeG(g)) ;
+        }
+    }
+
+    // Objective Function: Minimize Cost
+    IloExpr cost(env) ;
+    for (t=0 ; t < T ; t++) {
+        for (int g=0; g<nbG; g++) {
+            int i = pb->getFirstG(g) ;
+            cost += xx[g*T + t]*pb->getcf(i) + pb->getc0(i)*uu[g*T + t] + (pp[g*T + t]+pb->getP(i)*xx[g*T + t])*(pb->getcp(i)) ;
+
+        }
+    }
+
+    model.add(IloMinimize(env, cost));
+
+    cost.end() ;
+
+
+    // Conditions initiales
+    for (int g=0; g<nbG; g++) {
+        int i = pb->getFirstG(g) ;
+        model.add(uu[g*T] >= xx[g*T] - pb->getSizeG(g)*pb->getInit(i) ) ;
+    }
+
+    for (int g=0; g<nbG; g++) {
+        int i = pb->getFirstG(g) ;
+        IloExpr sum(env) ;
+        for (k= 0; k < pb->getl(i) ; k++) {
+            sum += uu[g*T + k] ;
+        }
+        model.add(sum <= pb->getSizeG(g) *(1 - pb->getInit(i) ) );
+        sum.end() ;
+    }
+
+    // Min up constraints
+    for (int g=0; g<nbG; g++) {
+        int i = pb->getFirstG(g) ;
+        for (t=pb->getL(i) -1 ; t < T ; t++) {
+            IloExpr sum(env) ;
+            for (k= t - pb->getL(i) + 1; k <= t ; k++) {
+                sum += uu[g*T + k] ;
+            }
+            model.add(sum <= xx[g*T + t]) ;
+            sum.end() ;
+        }
+    }
+
+
+    // Min down constraints
+    for (int g=0; g<nbG; g++) {
+        int i = pb->getFirstG(g) ;
+        for (t=pb->getl(i) ; t < T ; t++) {
+            IloExpr sum(env) ;
+            for (k= t - pb->getl(i) + 1; k <= t ; k++) {
+                sum += uu[g*T + k] ;
+            }
+            model.add(sum <= pb->getSizeG(g) - xx[g*T + t - pb->getl(i)]) ;
+            sum.end() ;
+        }
+    }
+
+    //Relation entre u et x
+    for (int g=0; g<nbG; g++) {
+        for (t=1 ; t < T ; t++) {
+            model.add(xx[g*T + t] - xx[g*T + t-1] <= uu[g*T + t]);
+        }
+    }
+
+
+    //Limite de production
+    for (int g=0; g<nbG; g++) {
+        int i = pb->getFirstG(g) ;
+        for (t=0 ; t < T ; t++) {
+            model.add(pp[g*T + t] <= (pb->getPmax(i)-pb->getP(i))*xx[g*T + t]);
+            model.add(pp[g*T + t] >= 0);
+        }
+    }
+
+
+    //Demande
+    for (t=0; t < T ; t++) {
+        IloExpr Prod(env) ;
+        for (int g=0; g<nbG; g++) {
+            int i = pb->getFirstG(g) ;
+            Prod += pp[g*T + t] + pb->getP(i)*xx[g*T + t];
+        }
+        model.add(pb->getD(t) <= Prod);
+        Prod.end() ;
+    }
+
+
+    return model ;
+
+}

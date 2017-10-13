@@ -138,13 +138,13 @@ IloModel defineModel_y(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, c
 
             for (int t = 1 ; t < T ; t++) {
                 model.add(y[i*T + t] <= y[i*T + t-1]) ;
-                model.add(y[i*T + t] + y[i*T + t-1] + x[i*T+t] - x[(i+1)*T +t] <= 2) ;
+                model.add(y[i*T + t] + x[i*T+t] - x[(i+1)*T +t] <= 1) ;
 
-                model.add(-y[i*T + t] + y[i*T + t-1] + x[i*T+t] + x[(i+1)*T +t] <= 2) ;
-                model.add(y[i*T + t] - y[i*T + t-1] + x[i*T+t] + x[(i+1)*T +t] >= 0) ;
+                model.add(-y[i*T + t] + y[i*T + t-1] + x[(i+1)*T +t] <= 1) ;
+                model.add(y[i*T + t] - y[i*T + t-1] + x[i*T+t] >= 0) ;
 
                 //ordre lexico
-                model.add(1 - y[i*T + t-1] + x[i*T+t]  >= x[(i+1)*T + t] ) ;
+                model.add(1 - 2*y[i*T + t-1] + y[i*T + t]+ x[i*T+t]  >= x[(i+1)*T + t] ) ;
 
             }
         }

@@ -332,6 +332,9 @@ main(int argc,char**argv)
     Methode IneqPures;
     IneqPures.UseIneqSum();
 
+    Methode IneqVarY;
+    IneqVarY.UseIneqVarY();
+
     Methode IneqCB ;
     IneqCB.UseIneqSum() ;
     IneqCB.UseBranchCB();
@@ -489,24 +492,27 @@ main(int argc,char**argv)
         Instance.T=T ;
         IloEnv env ;
 
-        for (sym= 2 ; sym <= 4 ; sym++) {
+        for (sym= 4 ; sym >= 2 ; sym--) {
             Instance.symetrie = sym ;
             for (int id=1; id <=20; id++) {
                 Instance.id = id ;
 
                 /*env=IloEnv() ;
                 process(Instance, fichier, time, DefaultCplex, env) ;
+                env.end() ;*/
+                env=IloEnv() ;
+                process(Instance, fichier, time, CBCplex, env) ;
                 env.end() ;
 
-                env=IloEnv() ;
-                process(Instance, fichier, time, IneqPures, env) ;
-                env.end() ;
-
-                env=IloEnv() ;
-                process(Instance, fichier, time, IneqCB, env) ;
+                /*env=IloEnv() ;
+                process(Instance, fichier, time, IneqVarY, env) ;
                 env.end() ;*/
 
-                env=IloEnv() ;
+                /*env=IloEnv() ;
+                process(Instance, fichier, time, IneqCB, env) ;
+                env.end() ;
+*/
+               /* env=IloEnv() ;
                 process(Instance, fichier, time, StaticFixWithBranching, env) ;
                 env.end() ;
 
@@ -518,7 +524,7 @@ main(int argc,char**argv)
 
                 env=IloEnv() ;
                 process(Instance, fichier, time, StaticFixWithBranching_all, env) ;
-                env.end() ;
+                env.end() ;*/
 
                 fichier << endl ;
             }

@@ -132,6 +132,11 @@ public:
         doIneqSum=1 ;
     }
 
+    void UseIneqVarY() { // on peut choisir ou non d'utiliser un lazy callback dans ce cas (même si fixing static en plus)
+        num=-2 ;
+        doCplex=0 ;
+        doIneqVarY=1 ;
+    }
     void AddIneqSum() { // on peut choisir ou non d'utiliser un lazy callback dans ce cas (même si fixing static en plus)
         doCplex=0 ;
         doIneqSum=1 ;

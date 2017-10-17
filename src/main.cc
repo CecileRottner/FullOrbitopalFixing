@@ -413,6 +413,14 @@ main(int argc,char**argv)
         if (met==1) {
 
             env=IloEnv() ;
+            process(Instance, fichier, time, DefaultCplex, env) ;
+            env.end() ;
+
+            env=IloEnv() ;
+            process(Instance, fichier, time, CBCplex, env) ;
+            env.end() ;
+
+            env=IloEnv() ;
             process(Instance, fichier, time, StaticFix, env) ;
             env.end() ;
 
@@ -501,15 +509,21 @@ main(int argc,char**argv)
 
         for (sym= 4 ; sym >= 2 ; sym--) {
             Instance.symetrie = sym ;
-            for (int id=1; id <=20; id++) {
+            for (int id=3; id <=20; id++) {
                 Instance.id = id ;
 
-                env=IloEnv() ;
+               /*env=IloEnv() ;
                 process(Instance, fichier, time, DefaultCplex, env) ;
+                env.end() ;*/
+
+                DynamicFix.printParam() ;
+
+
+                 env=IloEnv() ;
+                process(Instance, fichier, time, DynamicFix, env) ;
                 env.end() ;
-                env=IloEnv() ;
-                process(Instance, fichier, time, AggregModel, env) ;
-                env.end() ;
+
+
 
                 /*env=IloEnv() ;
                 process(Instance, fichier, time, IneqVarY, env) ;

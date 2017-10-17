@@ -268,6 +268,7 @@ void InstanceUCP::Initialise() {
         D += Pmax[np] ;
         np++ ;
     }*/
+
 }
 
 void InstanceUCP::Lecture(const char* file) {

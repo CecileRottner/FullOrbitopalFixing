@@ -63,6 +63,7 @@ public:
         doSpecialBranching = 0 ;
         useNumU = 0 ;
         doMob = 0 ;
+        doIup = 0 ;
 
         //indicateurs à l'arrache
         StopNode=10 ;
@@ -163,6 +164,24 @@ public:
         doSpecialBranching = 1 ;
     }
 
+    void printParam()  {
+        cout << "method nb: " << num << endl ;
+        cout << "Cplex only: " << doCplex << endl ;
+        cout << "Use sub symmetry ineq: " << doIneqSum << endl ;
+        cout << "Use variables y: " << doIneqVarY<< endl ;
+        cout << "Agregated model: " << doAggregatedModel << endl ;
+        cout << "Dynamic fixing: " << doDynamicFixing << endl ;
+        cout << "Static fixing: " << doStaticFixing << endl ;
+        cout << "MOB: " << doMob << endl ;
+        cout << "Use IUP: " << doIup << endl ;
+        cout << "Lazy Callback: " << UseLazyCallback << endl ;
+        cout << "Branch Callback: " << UseBranchCallback << endl ;
+        cout << "Use empty Branch Callback: " << UseEmptyBranchCallback << endl ;
+        cout << "Cut Callback: " << UseCutCallback << endl ;
+        cout << "Special branching: " << doSpecialBranching << endl ;
+        cout << "Stick to Cplex first branching decision: " << stickToCplexFirstBranchingDecision << endl ;
+        cout << "Use continuous u variable: " << useNumU << endl ;
+    }
 
     //accès aux paramètres
     int getNum() {return num ;}

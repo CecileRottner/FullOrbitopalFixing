@@ -21,6 +21,7 @@ private:
     int doCplex ;
     int doIneqSum ;
     int doIneqVarY ;
+    int doNumberOfOnes ;
     int doAggregatedModel ;
     int doDynamicFixing ;
     int doStaticFixing ;
@@ -57,6 +58,7 @@ public:
         UseCutCallback  = 0;
         doIneqSum = 0;
         doIneqVarY = 0;
+        doNumberOfOnes = 0 ;
         doAggregatedModel = 0 ;
         doStaticFixing = 0;
         doDynamicFixing = 0;
@@ -135,6 +137,11 @@ public:
         doIneqSum=1 ;
     }
 
+    void UseNumberOfOnes() {
+        num=-6 ;
+        doCplex=0 ;
+        doNumberOfOnes=1 ;
+    }
     void UseIneqVarY() { // on peut choisir ou non d'utiliser un lazy callback dans ce cas (même si fixing static en plus)
         num=-2 ;
         doCplex=0 ;
@@ -187,6 +194,7 @@ public:
     int getNum() {return num ;}
     int CplexOnly() {return doCplex;}
     int IneqSum() {return doIneqSum;}
+    int NumberOfOnes() {return doNumberOfOnes;}
     int IneqVarY() {return doIneqVarY;}
     int AggregatedModel() {return doAggregatedModel;}
     int DynamicFixing() {return doDynamicFixing;}

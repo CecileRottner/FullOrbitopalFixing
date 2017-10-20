@@ -60,8 +60,9 @@ ILOBRANCHCALLBACK4(BCallBack, Methode &, methode, SubPb &, sub, myNodeData*, dat
             data = dynamic_cast <myNodeData *> (getNodeData()) ; // sinon on récupère le nodeData du noeud courant
         }
 
+
         int father = data->num ;
-        if (father==0) {
+        if (father==0 && !methode.CplexOnly() ) {
             getFeasibilities(sub.feasible, sub.x) ;
         }
         //implied feasible variables
@@ -81,9 +82,12 @@ ILOBRANCHCALLBACK4(BCallBack, Methode &, methode, SubPb &, sub, myNodeData*, dat
 
 
         //////////// Mise à jour de sub ///////////////
-        getUBs(sub.UB, sub.x) ;
-        getLBs(sub.LB, sub.x) ;
-        sub.update(varID, dataFils);
+
+        if ( !methode.CplexOnly() ) {
+            getUBs(sub.UB, sub.x) ;
+            getLBs(sub.LB, sub.x) ;
+            sub.update(varID, dataFils);
+        }
 
         /////////// Méthodes ////////////
         Branching branch= Branching(getEnv()) ;
@@ -97,7 +101,10 @@ ILOBRANCHCALLBACK4(BCallBack, Methode &, methode, SubPb &, sub, myNodeData*, dat
 
         if ( methode.Mob() ) { // MOB
             getValues(sub.x_frac,sub.x); // MOB : on a besoin des valeurs fractionnaires de x
+
+            cout << "ici MOB" << endl ;
             doMOB(branch, sub) ;
+            cout << "MOB done" << endl ;
         }
 
 
@@ -227,6 +234,8 @@ ILOLAZYCONSTRAINTCALLBACK1(LazyCB, IloInt, fake) {}
 
 int process(InstanceProcessed I, ofstream & fichier, double & time, Methode met, IloEnv env) {
 
+   // cout << "ici : " << met.getNum() << endl ;
+
     string nom = I.fileName() ;
     const char* file = nom.c_str() ;
 
@@ -244,10 +253,21 @@ int process(InstanceProcessed I, ofstream & fichier, double & time, Methode met,
 
     IloModel model ;
     if (met.IneqVarY()) {
-        model = defineModel_y(env,inst,x,u) ;
+        if (!met.IneqSum()) {
+            model = defineModel_y(env,inst,x,u) ;
+        }
+        else {
+            model = defineModel_sum(env,inst, x,u, -5) ;
+        }
     }
     else if (met.IneqSum()) {
         model = defineModel_sum(env,inst, x,u, -3) ;
+
+    }
+
+    else if (met.NumberOfOnes()) {
+        cout <<" ici (nb of ones)" << endl ;
+        model = defineModel_numberOfOnes(env,inst, x,u) ;
     }
 
     else if (met.AggregatedModel()) {
@@ -339,6 +359,14 @@ main(int argc,char**argv)
     Methode IneqVarY;
     IneqVarY.UseIneqVarY();
 
+    Methode IneqNumberOfOnes;
+    IneqNumberOfOnes.UseNumberOfOnes();
+
+    Methode IneqSumAndVarY;
+    IneqSumAndVarY.UseIneqVarY();
+    IneqSumAndVarY.UseIneqSum();
+    IneqSumAndVarY.setNum(-5);
+
     Methode AggregModel;
     AggregModel.UseAggregatedModel();
 
@@ -416,9 +444,9 @@ main(int argc,char**argv)
             process(Instance, fichier, time, DefaultCplex, env) ;
             env.end() ;
 
-            env=IloEnv() ;
+           /* env=IloEnv() ;
             process(Instance, fichier, time, CBCplex, env) ;
-            env.end() ;
+            env.end() ;*/
 
             env=IloEnv() ;
             process(Instance, fichier, time, Mob, env) ;
@@ -518,20 +546,23 @@ main(int argc,char**argv)
 
 
                 env=IloEnv() ;
-                process(Instance, fichier, time, AggregModel, env) ;
+                process(Instance, fichier, time, IneqVarY, env) ;
                 env.end() ;
 
+                env=IloEnv() ;
+                process(Instance, fichier, time, IneqPures, env) ;
+                env.end() ;
 
+                env=IloEnv() ;
+                process(Instance, fichier, time, IneqNumberOfOnes, env) ;
+                env.end() ;
 
-                /*env=IloEnv() ;
-                process(Instance, fichier, time, IneqVarY, env) ;
-                env.end() ;*/
 
                 /*env=IloEnv() ;
                 process(Instance, fichier, time, IneqCB, env) ;
                 env.end() ;
 */
-               /* env=IloEnv() ;
+                /* env=IloEnv() ;
                 process(Instance, fichier, time, StaticFixWithBranching, env) ;
                 env.end() ;
 

@@ -150,10 +150,35 @@ IloModel defineModel_y(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, c
         }
     }
 
-
     return model ;
 }
 
+IloModel defineModel_numberOfOnes(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, const IloBoolVarArray & u) {
+
+    int T = pb->getT() ;
+    IloModel model  ;
+    int k ;
+    model = defineModel(env, pb, x, u, 0) ;
+
+    for (int g=0 ; g < pb->nbG ; g++) {
+
+        int first = pb->FirstG[g] ;
+        int last = pb->LastG[g] ;
+
+        if (first < last) {
+            for (int i=first ; i < last ; i++) {
+                IloExpr numberOfOnes(env) ;
+
+                for (int t = 0 ; t < T ; t++) {
+                    numberOfOnes += x[i*T+t] - x[(i+1)*T +t] ;
+                }
+                model.add(numberOfOnes >= 0) ;
+
+            }
+        }
+        return model ;
+    }
+}
 
 IloModel defineModel_sum(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, const IloBoolVarArray & u, int methode) {
 

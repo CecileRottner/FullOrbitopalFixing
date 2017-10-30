@@ -52,6 +52,7 @@ include cplex.mk
 
 OBJ_LIST := InstanceUCP.o \
 	    ModeleUCP.o \
+	    ModeleFlot.o \
 	    Branching.o \
 	    Node.o \
 	    Mob.o \
@@ -125,6 +126,7 @@ mrproper: clean
 
 
 build/InstanceUCP.o   : InstanceUCP.h
+build/ModeleFlot.o : InstanceUCP.h ModeleFlot.h
 build/ModeleUCP.o : InstanceUCP.h ModeleUCP.h
 build/Branch.o : Node.h InstanceUCP.h
 build/Node.o : Node.h InstanceUCP.h

@@ -9,7 +9,7 @@ n=60
 T=48
 
 for sym in 4 3 2 ; do
-  for id in {3..20}; do
+  for id in {1..20}; do
       ./mf 1 $dossier $n $T 1 3 $sym 0 0 $id
   done
 done

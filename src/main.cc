@@ -9,6 +9,7 @@
 #include <list>
 
 #include "InstanceUCP.h"
+#include "ModeleFlot.h"
 #include "ModeleUCP.h"
 #include "Node.h"
 #include "Process.h"
@@ -23,6 +24,7 @@ using namespace std ;
 ILOSTLBEGIN
 
 ILOBRANCHCALLBACK4(BCallBack, Methode &, methode, SubPb &, sub, myNodeData*, data, int, count) {
+
 
     clock_t start;
 
@@ -102,10 +104,9 @@ ILOBRANCHCALLBACK4(BCallBack, Methode &, methode, SubPb &, sub, myNodeData*, dat
         if ( methode.Mob() ) { // MOB
             getValues(sub.x_frac,sub.x); // MOB : on a besoin des valeurs fractionnaires de x
 
-            cout << "ici MOB" << endl ;
             doMOB(branch, sub) ;
-            cout << "MOB done" << endl ;
         }
+
 
 
         if ( methode.StaticFixing() || methode.DynamicFixing() ) { // fixing
@@ -113,6 +114,7 @@ ILOBRANCHCALLBACK4(BCallBack, Methode &, methode, SubPb &, sub, myNodeData*, dat
             if ( !methode.SpecialBranching() ) {
 
                 // Fixing avec branchement cplex (static ou dynamic)
+
                 getBranch(branch.varLeft, branch.bLeft, branch.dirLeft, 0) ;
                 getBranch(branch.varRight, branch.bRight, branch.dirRight, 1) ;
                 sub.doFixing(branch, pruneLeft, pruneRight, getNnodes()) ;
@@ -224,6 +226,7 @@ ILOBRANCHCALLBACK4(BCallBack, Methode &, methode, SubPb &, sub, myNodeData*, dat
 
         sub.timeFix += ( clock() - start ) / (double) CLOCKS_PER_SEC;
     }
+
 
 
 }
@@ -444,9 +447,9 @@ main(int argc,char**argv)
             process(Instance, fichier, time, DefaultCplex, env) ;
             env.end() ;
 
-           /* env=IloEnv() ;
+            env=IloEnv() ;
             process(Instance, fichier, time, CBCplex, env) ;
-            env.end() ;*/
+            env.end() ;
 
             env=IloEnv() ;
             process(Instance, fichier, time, Mob, env) ;
@@ -535,9 +538,9 @@ main(int argc,char**argv)
         Instance.T=T ;
         IloEnv env ;
 
-        for (sym= 4 ; sym >= 2 ; sym--) {
+        for (sym= 4 ; sym >= 4 ; sym--) {
             Instance.symetrie = sym ;
-            for (int id=1; id <=20; id++) {
+            for (int id=3; id <=20; id++) {
                 Instance.id = id ;
 
                 /*env=IloEnv() ;
@@ -546,17 +549,12 @@ main(int argc,char**argv)
 
 
                 env=IloEnv() ;
-                process(Instance, fichier, time, IneqVarY, env) ;
+                process(Instance, fichier, time, Mob, env) ;
                 env.end() ;
 
                 env=IloEnv() ;
-                process(Instance, fichier, time, IneqPures, env) ;
+                process(Instance, fichier, time, DynamicFix, env) ;
                 env.end() ;
-
-                env=IloEnv() ;
-                process(Instance, fichier, time, IneqNumberOfOnes, env) ;
-                env.end() ;
-
 
                 /*env=IloEnv() ;
                 process(Instance, fichier, time, IneqCB, env) ;

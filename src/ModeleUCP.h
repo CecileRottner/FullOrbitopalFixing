@@ -14,4 +14,5 @@ IloModel defineModel_numberOfOnes(IloEnv env, InstanceUCP* pb, const IloBoolVarA
 IloModel defineModel_sum(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, const IloBoolVarArray & u, int methode) ;
 IloModel AggregatedModel(IloEnv env, InstanceUCP* pb) ;
 
+
 #endif /* MODELEUCP_INCLUDED */

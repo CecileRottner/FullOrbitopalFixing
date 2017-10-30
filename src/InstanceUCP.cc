@@ -74,7 +74,7 @@ void InstanceUCP::Initialise() {
     quickSort(invDemande, ordreT, 0, T) ; // ordreT trie les t par demande décroissante
     //cout << "ordreT : " << ordreT << endl ;
 
-    quickSort(ordre,C_, 0, nbG);  //On trie les unités par Pmax décroissantes
+   // quickSort(ordre,C_, 0, nbG);  //On trie les unités par Pmax décroissantes
 
 
 

@@ -16,9 +16,12 @@ public:
     ModeleFlot(IloEnv enviro, InstanceUCP* pb) ;
 
     int Adj(int i, int t, int k) ;
+    int AdjG(int g, int t, int k) ;
     double Cost(int i, int t, int k) ;
+    double CostG(int g, int t, int k) ;
     int arc(int i, int t, int k) ;
-    IloModel defineModelFlot() ;
+    IloModel defineModelFlot(IloBoolVarArray f) ;
+    IloModel AggregatedFlowModel() ;
 
     ~ModeleFlot() {
     }

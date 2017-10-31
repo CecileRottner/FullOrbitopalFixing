@@ -21,6 +21,7 @@ private:
     int doCplex ;
     int doIneqSum ;
     int doIneqVarY ;
+    int doModeleFlot ;
     int doNumberOfOnes ;
     int doAggregatedModel ;
     int doDynamicFixing ;
@@ -58,6 +59,7 @@ public:
         UseCutCallback  = 0;
         doIneqSum = 0;
         doIneqVarY = 0;
+        doModeleFlot =0 ;
         doNumberOfOnes = 0 ;
         doAggregatedModel = 0 ;
         doStaticFixing = 0;
@@ -154,6 +156,13 @@ public:
         doAggregatedModel=1 ;
     }
 
+    void UseModeleFlot() { // on peut choisir ou non d'utiliser un lazy callback dans ce cas (même si fixing static en plus)
+        num=-7 ;
+        doCplex=0 ;
+        doModeleFlot=1 ;
+    }
+
+
     void AddIneqSum() { // on peut choisir ou non d'utiliser un lazy callback dans ce cas (même si fixing static en plus)
         doCplex=0 ;
         doIneqSum=1 ;
@@ -176,6 +185,7 @@ public:
         cout << "Cplex only: " << doCplex << endl ;
         cout << "Use sub symmetry ineq: " << doIneqSum << endl ;
         cout << "Use variables y: " << doIneqVarY<< endl ;
+        cout << "Use modèle flot: " << doModeleFlot << endl ;
         cout << "Agregated model: " << doAggregatedModel << endl ;
         cout << "Dynamic fixing: " << doDynamicFixing << endl ;
         cout << "Static fixing: " << doStaticFixing << endl ;
@@ -197,6 +207,7 @@ public:
     int NumberOfOnes() {return doNumberOfOnes;}
     int IneqVarY() {return doIneqVarY;}
     int AggregatedModel() {return doAggregatedModel;}
+    int ModeleFlot() {return doModeleFlot;}
     int DynamicFixing() {return doDynamicFixing;}
     int StaticFixing() {return doStaticFixing;}
     int Mob() {return doMob;}

@@ -237,7 +237,7 @@ ILOLAZYCONSTRAINTCALLBACK1(LazyCB, IloInt, fake) {}
 
 int process(InstanceProcessed I, ofstream & fichier, double & time, Methode met, IloEnv env) {
 
-   // cout << "ici : " << met.getNum() << endl ;
+    // cout << "ici : " << met.getNum() << endl ;
 
     string nom = I.fileName() ;
     const char* file = nom.c_str() ;
@@ -253,6 +253,7 @@ int process(InstanceProcessed I, ofstream & fichier, double & time, Methode met,
 
     IloBoolVarArray x(env,n*T);
     IloBoolVarArray u(env,n*T);
+    IloBoolVarArray f(env,n*(T+2)*(T+2));
 
     IloModel model ;
     if (met.IneqVarY()) {
@@ -269,13 +270,18 @@ int process(InstanceProcessed I, ofstream & fichier, double & time, Methode met,
     }
 
     else if (met.NumberOfOnes()) {
-        cout <<" ici (nb of ones)" << endl ;
         model = defineModel_numberOfOnes(env,inst, x,u) ;
     }
 
     else if (met.AggregatedModel()) {
         model = AggregatedModel(env, inst) ;
     }
+
+    else if (met.ModeleFlot()) {
+        ModeleFlot flot(env, inst) ;
+        model = flot.AggregatedFlowModel();
+    }
+
     else {
         model = defineModel(env,inst,x,u,met.NumU()) ;
     }
@@ -306,6 +312,7 @@ int process(InstanceProcessed I, ofstream & fichier, double & time, Methode met,
     //Résolution et affichage de la solution
     cplex.solve();
 
+    cout << "feasible : " << cplex.isPrimalFeasible() << endl ;
     /*cplex.getValues(sub.x_frac, x) ;
 
     for (int t=0 ; t < T ; t++) {
@@ -320,6 +327,33 @@ int process(InstanceProcessed I, ofstream & fichier, double & time, Methode met,
     }
     cout << endl;*/
 
+    ///Affichage solution optimale
+    /*if (met.ModeleFlot()) {
+        IloNumArray flots(env, 0) ;
+        cplex.getValues(flots, f) ;
+
+        for (int i=0; i<n; i++) {
+            for (int t=0 ; t < T+2 ; t++) {
+                for (int k = 0 ; k < T+2; k++) {
+                    if (flots[t + (T+2)*k + (T+2)*(T+2)*i] >0) {
+                        cout << "arc: " << i << ", " << t << ", " << k << endl ;
+                    }
+                }
+            }
+        }
+    }
+
+    else {
+        cplex.getValues(sub.x_frac, x) ;
+        for (int i=0; i<n; i++) {
+            cout << "unité " << i << " : " ;
+            for (int t=0 ; t < T ; t++) {
+                cout << sub.x_frac[i*T +t] << " " ;
+            }
+        }
+        cout << endl ;
+    }
+*/
     double t = cplex.getCplexTime();
     double opt = cplex.getObjValue() ;
 
@@ -342,6 +376,7 @@ int process(InstanceProcessed I, ofstream & fichier, double & time, Methode met,
     delete dataNode ;
     // env.end() ;
     return opt;
+    return 0 ;
 }
 
 
@@ -361,6 +396,9 @@ main(int argc,char**argv)
 
     Methode IneqVarY;
     IneqVarY.UseIneqVarY();
+
+    Methode Flot;
+    Flot.UseModeleFlot();
 
     Methode IneqNumberOfOnes;
     IneqNumberOfOnes.UseNumberOfOnes();
@@ -532,15 +570,15 @@ main(int argc,char**argv)
         fichier << localisation << endl ;
         Instance.localisation = localisation ;
 
-        n=60 ;
-        T=48;
+        n=30;
+        T=96;
         Instance.n=n;
         Instance.T=T ;
         IloEnv env ;
 
-        for (sym= 4 ; sym >= 4 ; sym--) {
+        for (sym= 4; sym >=3 ; sym--) {
             Instance.symetrie = sym ;
-            for (int id=3; id <=20; id++) {
+            for (int id=1; id <=20; id++) {
                 Instance.id = id ;
 
                 /*env=IloEnv() ;
@@ -549,11 +587,19 @@ main(int argc,char**argv)
 
 
                 env=IloEnv() ;
-                process(Instance, fichier, time, Mob, env) ;
+                process(Instance, fichier, time, DefaultCplex, env) ;
                 env.end() ;
 
                 env=IloEnv() ;
-                process(Instance, fichier, time, DynamicFix, env) ;
+                process(Instance, fichier, time, IneqPures, env) ;
+                env.end() ;
+
+                env=IloEnv() ;
+                process(Instance, fichier, time, AggregModel, env) ;
+                env.end() ;
+
+                env=IloEnv() ;
+                process(Instance, fichier, time, Flot, env) ;
                 env.end() ;
 
                 /*env=IloEnv() ;

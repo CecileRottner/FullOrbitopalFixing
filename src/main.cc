@@ -253,6 +253,7 @@ int process(InstanceProcessed I, ofstream & fichier, double & time, Methode met,
 
     IloBoolVarArray x(env,n*T);
     IloBoolVarArray u(env,n*T);
+
     IloBoolVarArray f(env,n*(T+2)*(T+2));
 
     IloModel model ;
@@ -566,17 +567,17 @@ main(int argc,char**argv)
         InstanceProcessed Instance = InstanceProcessed(n, T, bloc, demande, sym, cat01, intra, 0, localisation) ;
 
 
-        localisation = "data/Litt_Real/" ;
+        localisation = "data/small_groups/" ;
         fichier << localisation << endl ;
         Instance.localisation = localisation ;
 
-        n=30;
+        n=200;
         T=96;
         Instance.n=n;
         Instance.T=T ;
         IloEnv env ;
 
-        for (sym= 4; sym >=3 ; sym--) {
+        for (sym= 100; sym >=100 ; sym--) {
             Instance.symetrie = sym ;
             for (int id=1; id <=20; id++) {
                 Instance.id = id ;
@@ -586,21 +587,15 @@ main(int argc,char**argv)
                 env.end() ;*/
 
 
+
                 env=IloEnv() ;
-                process(Instance, fichier, time, DefaultCplex, env) ;
+                process(Instance, fichier, time, AggregModel , env) ;
                 env.end() ;
 
                 env=IloEnv() ;
                 process(Instance, fichier, time, IneqPures, env) ;
                 env.end() ;
 
-                env=IloEnv() ;
-                process(Instance, fichier, time, AggregModel, env) ;
-                env.end() ;
-
-                env=IloEnv() ;
-                process(Instance, fichier, time, Flot, env) ;
-                env.end() ;
 
                 /*env=IloEnv() ;
                 process(Instance, fichier, time, IneqCB, env) ;

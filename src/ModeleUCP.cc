@@ -107,6 +107,9 @@ IloModel defineModel(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, con
         model.add(IloConversion(env, u, IloNumVar::Float) ) ;
     }
 
+   /* model.add(IloConversion(env, x, IloNumVar::Float) ) ;
+    model.add(IloConversion(env, u, IloNumVar::Float) ) ;*/
+
     // pp.end() ;
 
     return model ;
@@ -119,11 +122,13 @@ IloModel defineModel_y(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, c
 
     IloModel model = defineModel(env, pb, x, u, 0) ;
 
+
     int n = pb->getn();
     int T = pb->getT() ;
 
 
     IloBoolVarArray y(env, n*T) ;
+    //IloNumVarArray y(env, n*T,0,1) ;
 
     for (int g=0 ; g < pb->nbG ; g++) {
 
@@ -176,8 +181,9 @@ IloModel defineModel_numberOfOnes(IloEnv env, InstanceUCP* pb, const IloBoolVarA
 
             }
         }
-        return model ;
+
     }
+    return model ;
 }
 
 IloModel defineModel_sum(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, const IloBoolVarArray & u, int methode) {

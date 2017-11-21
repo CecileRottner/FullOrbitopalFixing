@@ -18,6 +18,8 @@
 // on a vérifié au préalable qu'il y avait des groupes au temps t
 int SubPb::setXmin(const SousMatrices & SubM, int tsub)  {
 
+    //idée : utiliser un vecteur ranks qui rappelle tous pas de temps qu'on considère pour le fixing
+
     //unité i appartient à l'ensemble SubM(t): SubM[i*T+t] == 1
 
     for (int g = 0 ; g < nbG ; g++) {
@@ -25,10 +27,15 @@ int SubPb::setXmin(const SousMatrices & SubM, int tsub)  {
             int last_g = LastG[g] ;
             int first_g = FirstG[g] ;
 
-            //redéfinition de last_g et first_g par rapport à la sous matrice correspondante
+            //redéfinition de last_g
 
+            int i=last_g ;
+            while ( !SubM.M[i*T+tsub] && i > first_g ) {
+                i-- ;
+            }
+            last_g=i ;
 
-            //colonne LastG[g] de Xmin
+            //colonne last_g de Xmin
             for (int t=0 ; t < T ;t++) {
                 if (values[last_g*T+ t] < 2) { // variable non libre
                     Xmin[last_g*T+ t] = values[last_g*T+ t] ;

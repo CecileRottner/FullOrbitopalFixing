@@ -15,6 +15,12 @@
 
 using namespace std ;
 
+SousMatrices::SousMatrices(IloEnv env, int n, int T, int nbG) {
+    M = IloIntArray(env, n*T) ;
+    ThereIsASet = IloIntArray(env, T);
+    ThereIsASetForG = IloIntArray(env, nbG*T) ;
+}
+
 myNodeData::myNodeData(IloEnv env, int T,  int nbG, Methode methode) { // initialisation à la racine
     num=0 ;
     rankOf = IloIntArray(env, T*nbG) ;
@@ -86,10 +92,15 @@ myNodeData::myNodeData(IloEnv env, myNodeData* data, int group, int time, int va
 }
 
 
-SubPb::SubPb(IloEnv env, InstanceUCP* inst, IloBoolVarArray xx, IloBoolVarArray uu, IloNum epsilon, Methode methode) {
+SubPb::SubPb(IloEnv env, InstanceUCP* inst, IloBoolVarArray xx, IloBoolVarArray uu, IloNum epsilon, Methode methode) :
+    n(inst->getn()), T(inst->getT()), nbG(inst->getnbG()),
+    RSU(SousMatrices(env, n, T, nbG)),
+    RSD(SousMatrices(env, n, T, nbG)),
+    Full(SousMatrices(env, n, T, nbG))
 
-    n= inst->getn() ;
-    T= inst->getT() ;
+{
+
+   // n= inst->getn() ;
 
     instance=inst ;
 
@@ -122,7 +133,7 @@ SubPb::SubPb(IloEnv env, InstanceUCP* inst, IloBoolVarArray xx, IloBoolVarArray 
 
     cout << "Last: " << Last << endl ;
     cout << "Group: " << Group << endl;
-    nbG = inst->getnbG() ;
+
     FirstG = IloIntArray(env, nbG) ;
     LastG = IloIntArray(env, nbG) ;
     for (int i=0 ; i < nbG ; i++) {
@@ -130,6 +141,16 @@ SubPb::SubPb(IloEnv env, InstanceUCP* inst, IloBoolVarArray xx, IloBoolVarArray 
         LastG[i] = inst->getLastG(i) ;
     }
 
+    for (int t = 0 ; t < T ; t++) {
+        Full.ThereIsASet[t]=1 ;
+        for (int i=0 ; i < n ; i++) {
+            Full.M[i*T+t]=1 ;
+        }
+        for (int g= 0 ; g < nbG ; g++) {
+            Full.ThereIsASetForG[g*T+t] = 1 ;
+        }
+
+    }
 
     ///// rankOf, timeOf, finOrdre
 
@@ -246,38 +267,38 @@ void SubPb::update(int varID, myNodeData* data) {
         }
     }
 
-    //Mise à jour de values en fonction de l'ordre
+    //Mise à jour de values en fonction de l'ordre. tout est mis dans value, même les pas de temps non ordonnés. ils ne seront pas traités malgré tout par le fixing.
     for (int i=0 ; i < n ; i++) {
         int g = Group[i] ;
-        for (int t=0 ; t <= finOrdre[g] ; t++) {
+        for (int r=0 ; r < T ; r++) {
             // for (int t=0 ; t < T ; t++) {
-            int time = timeOf[g*T + t] ;
-            if (LB[i*T + timeOf[g*T + t]] >= 1 -eps) {
-                values[i*T + t] = 1 ;
+            int time = timeOf[g*T + r] ;
+            if (LB[i*T + time] >= 1 -eps) {
+                values[i*T + r] = 1 ;
             }
-            else if (UB[i*T + timeOf[g*T + t]] <= eps) {
-                values[i*T + t] = 0 ;
+            else if (UB[i*T + time] <= eps) {
+                values[i*T + r] = 0 ;
             }
             else {
-                values[i*T + t] = 8 ;
+                values[i*T + r] = 8 ;
             }
-            if (UB[i*T + timeOf[g*T + t]] - LB[i*T + timeOf[g*T + t]] < -eps ) {
+            if (UB[i*T + time] - LB[i*T + time] < -eps ) {
 
-                values[i*T + t] = 8 ;
+                values[i*T + r] = 8 ;
 
                 UB_LB=1 ;
                 cout << "Cas où UB < LB" << endl ;
-                cout << "i, t : " << i << ", " <<  timeOf[g*T + t] << endl ;
-                cout << "at node : " << node << ", bounds : " << LB[i*T + timeOf[g*T + t]] << "; " << UB[i*T + timeOf[g*T + t]] << endl ;
-                cout << "Feasibility : " << feasible[i*T + timeOf[g*T + t]] << endl ;
+                cout << "i, t : " << i << ", " <<  time << endl ;
+                cout << "at node : " << node << ", bounds : " << LB[i*T + time] << "; " << UB[i*T + time] << endl ;
+                cout << "Feasibility : " << feasible[i*T + time] << endl ;
                 cout << endl ;
 
                 prune=1 ;
             }
         }
-        for (int t= finOrdre[g] +1 ; t < T ; t++) {
+        /*for (int t= finOrdre[g] +1 ; t < T ; t++) {
             values[i*T + t] = 8 ;
-        }
+        }*/
     }
 
 }

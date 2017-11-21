@@ -16,6 +16,22 @@
 
 using namespace std ;
 
+//Structure sous-matrice adaptée aux sous-matrices du type: ensemble d'unités x tous les pas de temps de t à T
+class SousMatrices {
+public:
+    IloIntArray M ; // matrices n x T. ligne t de M donne toutes les unités permutables (pour les pas de temps t à T) au sein de leur groupe de symétrie.
+    IloIntArray ThereIsASetForG ; // Case g*T+t contient 1 s'il y a plus d'une unité permutable (de t à T) dans le groupe g
+    IloIntArray ThereIsASet ; // case t contient 1 s'il y a un groupe de symétrie avec plus de 2 unités permutables pour les pas de temps t à T
+
+    SousMatrices(IloEnv env, int n, int T, int nbG) ;
+    ~SousMatrices() {
+        M.end() ;
+        ThereIsASet.end();
+        ThereIsASetForG.end();
+    }
+};
+
+
 class Branching {
 
 public :
@@ -94,6 +110,12 @@ public :
     IloIntArray LastG ;
     IloIntArray Group ;
     IloInt nbG ; // taille de FirstG
+
+    //Données fixing sous symétries
+
+    SousMatrices RSU ;
+    SousMatrices RSD ;
+    SousMatrices Full ; // sous matrice=matrice totale. Pour faire le fixing global.
 
     //ordre des t
     IloIntArray rankOf ; //rankOf[t] : rang du pas de temps t
@@ -187,7 +209,9 @@ public :
     void computeValuesU() ;
     void getVar(int varID, int & unit, int & time, int & varX) ;
 
-    int setXmin() ;
+    // Calcul de Xmin et Xmax de la sous matrice donnée par les unités de la ligne t de SubM.M (colonnes à 1), pour les pas de temps de t à T.
+    //Le fixing est fait au sein de chaque groupe de symétrie comme pour le fixing global.
+    int setXmin(const SousMatrices & SubM, int t) ;
     int setXmax() ;
 
     int doFixing_side(Branching & branch, int side) ;

@@ -14,94 +14,103 @@
 #include "Node.h"
 #include "Fixing.h"
 
-int SubPb::setXmin() {
+
+// on a vérifié au préalable qu'il y avait des groupes au temps t
+int SubPb::setXmin(const SousMatrices & SubM, int tsub)  {
+
+    //unité i appartient à l'ensemble SubM(t): SubM[i*T+t] == 1
 
     for (int g = 0 ; g < nbG ; g++) {
-        int last_g = LastG[g] ;
-        int first_g = FirstG[g] ;
+        if (SubM.ThereIsASetForG[g*T+tsub]) {
+            int last_g = LastG[g] ;
+            int first_g = FirstG[g] ;
 
-        //colonne LastG[g] de Xmin
-        for (int t=0 ; t < T ;t++) {
-            if (values[last_g*T+ t] < 2) {
-                Xmin[last_g*T+ t] = values[last_g*T+ t] ;
-            }
-            else {
-                Xmin[last_g*T+ t] = 0 ;
-            }
-        }
+            //redéfinition de last_g et first_g par rapport à la sous matrice correspondante
 
-        for (int i = last_g-1 ; i >=first_g ; i--) {
 
-            //colonnes i vs i+1
-            int ld = -1 ; //last discriminating row
-
-            int stop=0 ;
-            int t = 0 ;
-
-            while (!stop && (t < T)) {
-
-                if ((values[i*T+t] == 1) && (Xmin[(i+1)*T+t] == 0)) {
-                    Xmin[(i)*T+t] = values[i*T+t] ;
-                    stop=1 ;
+            //colonne LastG[g] de Xmin
+            for (int t=0 ; t < T ;t++) {
+                if (values[last_g*T+ t] < 2) { // variable non libre
+                    Xmin[last_g*T+ t] = values[last_g*T+ t] ;
                 }
+                else {
+                    Xmin[last_g*T+ t] = 0 ;
+                }
+            }
 
-                if ((values[i*T+t] == 0) && (Xmin[(i+1)*T+t] == 1)) {
-                    stop = 1 ;
-                    if (ld==-1) {
-                        return 1 ; // 1= on élague
+            for (int i = last_g-1 ; i >=first_g ; i--) {
+
+                //colonnes i vs i+1
+                int ld = -1 ; //last discriminating row
+
+                int stop=0 ;
+                int t = 0 ;
+
+                while (!stop && (t < T)) {
+
+                    if ((values[i*T+t] == 1) && (Xmin[(i+1)*T+t] == 0)) {
+                        Xmin[(i)*T+t] = values[i*T+t] ;
+                        stop=1 ;
                     }
-                    else { //on met la dernière ligne discriminante à 1
-                        Xmin[i*T+ld] = 1 ;
 
-                        // on met à 0 tout ce qui est libre en dessous de ld et au dessus de t (ce qui est en dessous de t est traité après le while)
-                        for (int s=ld+1 ; s <= t ; s++) {
-                            if (values[i*T+s] == 8) {
-                                Xmin[i*T+s] = 0 ;
+                    if ((values[i*T+t] == 0) && (Xmin[(i+1)*T+t] == 1)) {
+                        stop = 1 ;
+                        if (ld==-1) {
+                            return 1 ; // 1= on élague
+                        }
+                        else { //on met la dernière ligne discriminante à 1
+                            Xmin[i*T+ld] = 1 ;
+
+                            // on met à 0 tout ce qui est libre en dessous de ld et au dessus de t (ce qui est en dessous de t est traité après le while)
+                            for (int s=ld+1 ; s <= t ; s++) {
+                                if (values[i*T+s] == 8) {
+                                    Xmin[i*T+s] = 0 ;
+                                }
+                                else {
+                                    Xmin[i*T+s] = values[i*T+s] ;
+                                }
+                            }
+
+                        } // fin else
+                    }
+
+                    if (!stop) {
+                        if (values[i*T+t] == 8) {
+                            if (Xmin[(i+1)*T+t] == 1) {
+                                Xmin[i*T+t] = 1 ;
                             }
                             else {
-                                Xmin[i*T+s] = values[i*T+s] ;
+                                Xmin[i*T+t] = 0 ;
+                                ld = t ;
                             }
                         }
-
-                    } // fin else
+                        else {
+                            Xmin[i*T+t] = values[i*T+t] ;
+                        }
+                    }
+                    t++ ;
                 }
 
-                if (!stop) {
-                    if (values[i*T+t] == 8) {
-                        if (Xmin[(i+1)*T+t] == 1) {
-                            Xmin[i*T+t] = 1 ;
+
+                if (stop) { // si on s'est arrêté, c'est que la ligne "t" (maintenant t-1) est à différence fixe
+                    //on met à 0 tout ce qui est en dessous}
+                    for (int s=t-1 ; s < T ; s++) {
+                        if (values[i*T+s] == 8) {
+                            Xmin[i*T+s] = 0 ;
                         }
                         else {
-                            Xmin[i*T+t] = 0 ;
-                            ld = t ;
+                            Xmin[i*T+s] = values[i*T+s];
                         }
                     }
-                    else {
-                        Xmin[i*T+t] = values[i*T+t] ;
-                    }
                 }
-                t++ ;
+                // fin i vs i+1
             }
-
-
-            if (stop) { // si on s'est arrêté, c'est que la ligne "t" (maintenant t-1) est à différence fixe
-                //on met à 0 tout ce qui est en dessous}
-                for (int s=t-1 ; s < T ; s++) {
-                    if (values[i*T+s] == 8) {
-                        Xmin[i*T+s] = 0 ;
-                    }
-                    else {
-                        Xmin[i*T+s] = values[i*T+s];
-                    }
-                }
-            }
-            // fin i vs i+1
         }
     }
     return 0 ;
 }
 
-int SubPb::setXmax() {
+int SubPb::setXmax()  {
 
     for (int g = 0 ; g < nbG ; g++) {
 
@@ -231,7 +240,7 @@ int SubPb::doFixing_side(Branching & branch, int side) { // la classe SubPb cont
         return 1 ;
     }
 
-    elague = setXmin() ;
+    elague = setXmin(Full,0) ;
     if (elague) {
         return 1 ;
     }
@@ -386,7 +395,7 @@ int SubPb::doFixing_side(Branching & branch, int side) { // la classe SubPb cont
                                     cout << endl ;
                                 }
 
-                               /*cout << "u : " << endl ;
+                                /*cout << "u : " << endl ;
                                 for (int s= 0 ; s <= finOrdre[g] ; s++) {
                                     for (int k = FirstG[g] ; k <= LastG[g] ; k++) {
 

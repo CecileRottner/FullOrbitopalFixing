@@ -566,25 +566,23 @@ main(int argc,char**argv)
         string localisation = "data/Litt_Real/" ;
         InstanceProcessed Instance = InstanceProcessed(n, T, bloc, demande, sym, cat01, intra, 0, localisation) ;
 
-
-        localisation = "data/small_groups/" ;
         fichier << localisation << endl ;
         Instance.localisation = localisation ;
 
-        n=200;
-        T=96;
+        n=60;
+        T=48;
         Instance.n=n;
         Instance.T=T ;
         IloEnv env ;
 
-        for (sym= 100; sym >=100 ; sym--) {
+        for (sym= 4; sym >=4 ; sym--) {
             Instance.symetrie = sym ;
-            for (int id=1; id <=20; id++) {
+            for (int id=3; id <=20; id++) {
                 Instance.id = id ;
 
                 /*env=IloEnv() ;
                 process(Instance, fichier, time, DefaultCplex, env) ;
-                env.end() ;*/
+                env.end() ;
 
 
 
@@ -594,8 +592,11 @@ main(int argc,char**argv)
 
                 env=IloEnv() ;
                 process(Instance, fichier, time, IneqPures, env) ;
-                env.end() ;
+                env.end() ;*/
 
+                env=IloEnv() ;
+                process(Instance, fichier, time, DynamicFix , env) ;
+                env.end() ;
 
                 /*env=IloEnv() ;
                 process(Instance, fichier, time, IneqCB, env) ;

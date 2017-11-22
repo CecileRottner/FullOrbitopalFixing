@@ -15,10 +15,50 @@
 
 using namespace std ;
 
-SousMatrices::SousMatrices(IloEnv env, int n, int T, int nbG) {
+SubMatrices::SubMatrices(IloEnv env, int n, int T, int nbG, int full) : T(T), n(n), nbG(nbG) {
     M = IloIntArray(env, n*T) ;
     ThereIsASet = IloIntArray(env, T);
     ThereIsASetForG = IloIntArray(env, nbG*T) ;
+    if (full) {
+
+        for (int t = 0 ; t < T ; t++) {
+            ThereIsASet[t]=1 ;
+            for (int i=0 ; i < n ; i++) {
+                M[i*T+t]=1 ;
+            }
+            for (int g= 0 ; g < nbG ; g++) {
+                ThereIsASetForG[g*T+t] = 1 ;
+            }
+
+        }
+    }
+}
+
+int SubMatrices::inGroup(int i, int t) const {
+    if (i<0 || i >=n) {
+        cout << "indice unité non compris entre 0 et n-1 dans méthode inGroup" << endl ;
+    }
+    if (t<0 || t>=T) {
+        cout << "indice pas de temps non compris entre 0 et T-1 dans méthode inGroup" << endl ;
+    }
+    return M[i*T+t] ;
+}
+
+int SubMatrices::SetForG(int g, int t) const {
+    if (g<0 || g >=nbG) {
+        cout << "indice groupe non compris entre 0 et nbG-1 dans méthode SetForG" << endl ;
+    }
+    if (t<0 || t>=T) {
+        cout << "indice pas de temps non compris entre 0 et T-1 dans méthode SetForG" << endl ;
+    }
+    return ThereIsASetForG[g*T+t] ;
+}
+
+int SubMatrices::SetAtT(int t) const {
+    if (t<0 || t>=T) {
+        cout << "indice pas de temps non compris entre 0 et T-1 dans méthode SetAtT" << endl ;
+    }
+    return ThereIsASet[t] ;
 }
 
 myNodeData::myNodeData(IloEnv env, int T,  int nbG, Methode methode) { // initialisation à la racine
@@ -94,9 +134,9 @@ myNodeData::myNodeData(IloEnv env, myNodeData* data, int group, int time, int va
 
 SubPb::SubPb(IloEnv env, InstanceUCP* inst, IloBoolVarArray xx, IloBoolVarArray uu, IloNum epsilon, Methode methode) :
     n(inst->getn()), T(inst->getT()), nbG(inst->getnbG()),
-    RSU(SousMatrices(env, n, T, nbG)),
-    RSD(SousMatrices(env, n, T, nbG)),
-    Full(SousMatrices(env, n, T, nbG))
+    RSU(SubMatrices(env, n, T, nbG)),
+    RSD(SubMatrices(env, n, T, nbG)),
+    Full(SubMatrices(env, n, T, nbG, 1))
 
 {
 
@@ -141,16 +181,6 @@ SubPb::SubPb(IloEnv env, InstanceUCP* inst, IloBoolVarArray xx, IloBoolVarArray 
         LastG[i] = inst->getLastG(i) ;
     }
 
-    for (int t = 0 ; t < T ; t++) {
-        Full.ThereIsASet[t]=1 ;
-        for (int i=0 ; i < n ; i++) {
-            Full.M[i*T+t]=1 ;
-        }
-        for (int g= 0 ; g < nbG ; g++) {
-            Full.ThereIsASetForG[g*T+t] = 1 ;
-        }
-
-    }
 
     ///// rankOf, timeOf, finOrdre
 

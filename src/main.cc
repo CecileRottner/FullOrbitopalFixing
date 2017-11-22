@@ -577,7 +577,7 @@ main(int argc,char**argv)
 
         for (sym= 4; sym >=4 ; sym--) {
             Instance.symetrie = sym ;
-            for (int id=3; id <=20; id++) {
+            for (int id=3; id <=3; id++) {
                 Instance.id = id ;
 
                 /*env=IloEnv() ;

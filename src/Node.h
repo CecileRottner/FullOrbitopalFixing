@@ -226,6 +226,8 @@ public :
     }
 
     void update(int varID, myNodeData* data) ;
+    void resetValues() ;
+    void updateValues(int side) ;
     void computeValuesU() ;
     void getVar(int varID, int & unit, int & time, int & varX) ;
 
@@ -234,8 +236,8 @@ public :
     int setXmin(const SubMatrices & SubM, int tsub) ;
     int setXmax(const SubMatrices & SubM, int tsub) ;
 
-    int doFixing_side(Branching & branch, int side) ;
-    void doFixing(Branching & branch, int & pruneLeft, int & pruneRight, int nNodes) ;
+    int ComputeSubMatrixFixing(Branching & branch, int side, SubMatrices SubM, int tsub) ;
+    void doFixing(Branching & branch, int & pruneLeft, int & pruneRight) ;
 
     int newVarU(Branching & branch, int nodes) ;
     int newVarUW(Branching & branch, int nodes) ;

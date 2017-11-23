@@ -117,7 +117,7 @@ ILOBRANCHCALLBACK4(BCallBack, Methode &, methode, SubPb &, sub, myNodeData*, dat
 
                 getBranch(branch.varLeft, branch.bLeft, branch.dirLeft, 0) ;
                 getBranch(branch.varRight, branch.bRight, branch.dirRight, 1) ;
-                sub.doFixing(branch, pruneLeft, pruneRight, getNnodes()) ;
+                sub.doFixing(branch, pruneLeft, pruneRight) ;
             }
 
             else {
@@ -137,7 +137,7 @@ ILOBRANCHCALLBACK4(BCallBack, Methode &, methode, SubPb &, sub, myNodeData*, dat
                     getBranch(branch.varRight, branch.bRight, branch.dirRight, 1) ;
                 }
 
-                sub.doFixing(branch, pruneLeft, pruneRight, getNnodes()) ;
+                sub.doFixing(branch, pruneLeft, pruneRight) ;
 
             }
         }

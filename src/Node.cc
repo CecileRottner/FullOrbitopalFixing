@@ -140,7 +140,7 @@ SubPb::SubPb(IloEnv env, InstanceUCP* inst, IloBoolVarArray xx, IloBoolVarArray 
 
 {
 
-   // n= inst->getn() ;
+    // n= inst->getn() ;
 
     instance=inst ;
 
@@ -298,10 +298,45 @@ void SubPb::update(int varID, myNodeData* data) {
     }
 
     //Mise à jour de values en fonction de l'ordre. tout est mis dans value, même les pas de temps non ordonnés. ils ne seront pas traités malgré tout par le fixing.
-    for (int i=0 ; i < n ; i++) {
+    resetValues() ;
+    /*for (int i=0 ; i < n ; i++) {
         int g = Group[i] ;
         for (int r=0 ; r < T ; r++) {
             // for (int t=0 ; t < T ; t++) {
+            int time = timeOf[g*T + r] ;
+            if (LB[i*T + time] >= 1 -eps) {
+                values[i*T + r] = 1 ;
+            }
+            else if (UB[i*T + time] <= eps) {
+                values[i*T + r] = 0 ;
+            }
+            else {
+                values[i*T + r] = 8 ;
+            }
+            if (UB[i*T + time] - LB[i*T + time] < -eps ) {
+
+                values[i*T + r] = 8 ;
+
+                UB_LB=1 ;
+                cout << "Cas où UB < LB" << endl ;
+                cout << "i, t : " << i << ", " <<  time << endl ;
+                cout << "at node : " << node << ", bounds : " << LB[i*T + time] << "; " << UB[i*T + time] << endl ;
+                cout << "Feasibility : " << feasible[i*T + time] << endl ;
+                cout << endl ;
+
+                prune=1 ;
+            }
+        }
+
+    }*/
+
+}
+
+void SubPb::resetValues() {
+
+    for (int i=0 ; i < n ; i++) {
+        int g = Group[i] ;
+        for (int r=0 ; r < T ; r++) {
             int time = timeOf[g*T + r] ;
             if (LB[i*T + time] >= 1 -eps) {
                 values[i*T + r] = 1 ;

@@ -245,8 +245,7 @@ int SubPb::setXmax(const SubMatrices & SubM, int tsub)  {
 
 }
 
-int SubPb::doFixing_side(Branching & branch, int side) { // la classe SubPb contient la variable sur laquelle le branchement va être fait, branch aussi
-
+void SubPb::updateValues(int side) { // on considère la matrice de la solution partielle sur la branche où la variable branchée est égale à "side". values est mis à jour en conséquence.
     int rang_t = rankOf[group*T + time];
     int rang_t_1 = -1 ;
 
@@ -276,7 +275,9 @@ int SubPb::doFixing_side(Branching & branch, int side) { // la classe SubPb cont
         }
     }
 
+}
 
+int SubPb::ComputeSubMatrixFixing(Branching & branch, int left, SubMatrices SubM, int tsub) { // la classe SubPb contient la variable sur laquelle le branchement va être fait, branch aussi
 
     int elague = setXmin(Full,0) ;
     if (elague) {
@@ -294,26 +295,6 @@ int SubPb::doFixing_side(Branching & branch, int side) { // la classe SubPb cont
     //sinon, il y a une solution
 
     if (!elague) {
-        // on détermine de quel côté (left ou right) il faut ajouter nos variables
-        int left = 0 ; // left = 1 si on ajoute à gauche, 0 sinon
-        if (side) {
-            if (branch.bLeft[0] == 1) {
-                left = 1 ;
-            }
-            else {
-                left= 0 ;
-            }
-        }
-
-        else { // side= 0
-            if (branch.bLeft[0] == 0) {
-                left = 1 ;
-            }
-            else {
-                left= 0 ;
-            }
-        }
-
 
 
         for (int i=0 ; i < n ; i++) {
@@ -344,7 +325,7 @@ int SubPb::doFixing_side(Branching & branch, int side) { // la classe SubPb cont
                             //affichage
                             if (!fix) {
                                 cout << "Fixing a " <<  node*left + (node+1)*!left << endl ;
-                                cout << "Variable branchée : "<< "unit, time : " << unit << ", " << time  << "= " << side << endl ;
+                                cout << "Variable branchée : "<< "unit, time : " << unit << ", " << time << endl ;
                                 cout << " x ? : " << varX << endl ;
 
                                 cout << "Fixing of unit i, time t : " << i << ", " << time_t << endl ;
@@ -408,7 +389,7 @@ int SubPb::doFixing_side(Branching & branch, int side) { // la classe SubPb cont
                             if (!fix) {
                                 cout << "Fixing a " << node*left + (node+1)*!left << endl ;
                                 cout << "on the right" << endl ;
-                                cout << "Variable branchée : "<< "unit, time : " << unit << ", " << time  << "= " << side << endl ;
+                                cout << "Variable branchée : "<< "unit, time : " << unit << ", " << time  <<  endl ;
                                 cout << " x ? : " << varX << endl ;
 
                                 cout << "Fixing of unit i, time t : " << i << ", " << time_t << endl ;
@@ -481,21 +462,32 @@ int SubPb::doFixing_side(Branching & branch, int side) { // la classe SubPb cont
     return 0 ;
 }
 
-void SubPb::doFixing(Branching & branch, int & pruneLeft, int & pruneRight, int nNodes) {
+void SubPb::doFixing(Branching & branch, int & pruneLeft, int & pruneRight) {
 
-    int pruneSide0 = doFixing_side(branch, 0) ; // fixe le côté var=0, à faire en premier car pour u=1 on modifie 2 valeurs et pour u=0 on modifie au pire 1
-    int pruneSide1 = doFixing_side(branch, 1) ; // fixe le côté var=1
+    int left; // est-ce que la branche considérée (côté 0 ou 1) est la branche de gauche
 
-
-    int left = 0 ; // left = 1 si c'est la variable de gauche qui est à 1, 0 sinon
-
-    if (branch.bLeft[0] == 1) {
+    ////////////////////////////// Côté branche à 0 //////////////////////////////
+    if (branch.bLeft[0] == 0) {
         left = 1 ;
     }
     else {
         left= 0 ;
     }
 
+    updateValues(0) ;
+    int pruneSide0 = ComputeSubMatrixFixing(branch, left, Full, 0) ; // fixe le côté var=0, à faire en premier car pour u=1 on modifie 2 valeurs et pour u=0 on modifie au pire 1
+
+
+    ////////////////////////////// Côté branche à 1 //////////////////////////////
+    left=!left ;
+    resetValues() ;
+    updateValues(1) ;
+    int pruneSide1 = ComputeSubMatrixFixing(branch, left, Full, 0) ; // fixe le côté var=1
+
+
+    ///////////////////////////////// Elagage ? /////////////////////////////////
+
+    // maintenant left = 1 si c'est la variable de gauche qui est à 1, 0 sinon
 
     if (left) {
         pruneLeft = pruneSide1 ;

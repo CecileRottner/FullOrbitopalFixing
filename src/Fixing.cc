@@ -20,6 +20,7 @@ int SubPb::setXmin(const SubMatrices & SubM, int tsub)  {
 
     for (int g = 0 ; g < nbG ; g++) {
         if (SubM.SetForG(g,tsub)) {
+
             int last_g = LastG[g] ;
             int first_g = FirstG[g] ;
 
@@ -30,6 +31,8 @@ int SubPb::setXmin(const SubMatrices & SubM, int tsub)  {
                 i-- ;
             }
             last_g=i ;
+
+
 
             //colonne last_g de Xmin
             for (int r=0 ; r <= finOrdre[g] ;r++) {
@@ -42,6 +45,7 @@ int SubPb::setXmin(const SubMatrices & SubM, int tsub)  {
                     }
                 }
             }
+
 
             int previous_unit = last_g ;
             for (int i = last_g-1 ; i >=first_g ; i--) {
@@ -277,100 +281,83 @@ void SubPb::updateValues(int side) { // on considère la matrice de la solution 
 
 }
 
-int SubPb::ComputeSubMatrixFixing(Branching & branch, int left, SubMatrices SubM, int tsub) { // la classe SubPb contient la variable sur laquelle le branchement va être fait, branch aussi
 
-    int elague = setXmin(Full,0) ;
+void SubPb::affichage(int left, int t, int i, int bound) {
+
+    int g = Group[i] ;
+    int time_of_t = timeOf[g*T + t] ;
+
+    cout << "Fixing a " <<  node*left + (node+1)*!left << endl ;
+    cout << "Variable branchée : "<< "unit, time : " << unit << ", " << time << endl ;
+    cout << " x ? : " << varX << endl ;
+
+    cout << "Fixing of unit i, time t : " << i << ", " << time_of_t << endl ;
+    cout << "Group : " << FirstG[g] << ", " << LastG[g] << endl ;
+    cout << "at bound : " << bound << endl ;
+    cout << "values[(i)*T+ t] = " << values[(i)*T+t] << endl ;
+
+    cout << "ordre des t : " ;
+    for (int s=0 ; s <= finOrdre[g] ; s++) {
+        cout << timeOf[g*T + s] << " " ;
+    }
+    cout << endl ;
+
+    for (int s= 0 ; s <= finOrdre[g] ; s++) {
+        for (int k = FirstG[g] ; k <= LastG[g] ; k++) {
+            cout << Xmin[k*T+s] << " " ;
+        }
+        cout << "          " ;
+        for (int k = FirstG[g] ; k <= LastG[g] ; k++) {
+            cout << values[k*T+s] << " " ;
+        }
+        cout << "          " ;
+        for (int k = FirstG[g] ; k <= LastG[g] ; k++) {
+            cout << Xmax[k*T+s] << " " ;
+        }
+        cout << "          " ;
+        cout << endl ;
+    }
+    cout << endl ;
+}
+
+int SubPb::ComputeSubMatrixFixing(Branching & branch, int left, const SubMatrices & SubM, int tsub) { // la classe SubPb contient la variable sur laquelle le branchement va être fait, branch aussi
+
+    int PrintFix=0 ;
+
+    int elague = setXmin(SubM,0) ;
+    if (elague) {
+        return 1 ;
+    }
+    elague = setXmax(SubM,0) ;
     if (elague) {
         return 1 ;
     }
 
-    elague = setXmax(Full,0) ;
-    if (elague) {
-        return 1 ;
-    }
-
-    int fix=1 ;
-
-
-    //sinon, il y a une solution
-
+    //si on élague pas, on peut faire du fixing
     if (!elague) {
-
-
         for (int i=0 ; i < n ; i++) {
-
             int stop=0 ;
             int t=0 ;
-
             int g = Group[i] ;
 
-
             while (!stop && t <= finOrdre[g] ) {
+                int time_of_t = timeOf[g*T + t] ;
 
-                int time_t = timeOf[g*T + t] ;
-                //cout << "t : " << t << endl ;
-                //cout << "min-max : " << endl ;
                 if (Xmax[i*T+t] == Xmin[i*T+t]) {
-
                     int bound = Xmax[i*T+t] ;
-                    if (values[i*T+t] == 8 && feasible[i*T+time_t] != 2) {
+                    if (values[i*T+t] == 8 && feasible[i*T+time_of_t] != 2) {
 
-                        /*if (feasible[i*T+time_t] == 2) {
-                            cout << "i, t: " << i << " " << time_t << " is 2-feasible" << endl ;
-                            cout << "LB, UB : " << LB[i*T+time_t] << ", " << UB[i*T + time_t] << endl ;
-                        }*/
+
+                        values[i*T+t] = bound ;// Mise à jour de values
+
+                        if (PrintFix) {
+                            affichage(left, t, i, bound ) ;
+                        }
+                        PrintFix=0 ;
 
                         if (left) {
-
-                            //affichage
-                            if (!fix) {
-                                cout << "Fixing a " <<  node*left + (node+1)*!left << endl ;
-                                cout << "Variable branchée : "<< "unit, time : " << unit << ", " << time << endl ;
-                                cout << " x ? : " << varX << endl ;
-
-                                cout << "Fixing of unit i, time t : " << i << ", " << time_t << endl ;
-                                cout << "Group : " << FirstG[g] << ", " << LastG[g] << endl ;
-                                cout << "at bound : " << bound << endl ;
-                                cout << "values[(i)*T+ t] = " << values[(i)*T+t] << endl ;
-
-                                cout << "ordre des t : " ;
-                                for (int s=0 ; s <= finOrdre[g] ; s++) {
-                                    cout << timeOf[g*T + s] << " " ;
-                                }
-                                cout << endl ;
-
-                                for (int s= 0 ; s <= finOrdre[g] ; s++) {
-                                    for (int k = FirstG[g] ; k <= LastG[g] ; k++) {
-                                        cout << Xmin[k*T+s] << " " ;
-                                    }
-                                    cout << "          " ;
-                                    for (int k = FirstG[g] ; k <= LastG[g] ; k++) {
-                                        cout << values[k*T+s] << " " ;
-                                    }
-                                    cout << "          " ;
-                                    for (int k = FirstG[g] ; k <= LastG[g] ; k++) {
-                                        cout << Xmax[k*T+s] << " " ;
-                                    }
-                                    cout << "          " ;
-                                    cout << endl ;
-                                }
-
-                                /*cout << "u : " << endl ;
-                                for (int s= 0 ; s <= finOrdre[g] ; s++) {
-                                    for (int k = FirstG[g] ; k <= LastG[g] ; k++) {
-
-                                        cout << valuesU[k*T+timeOf[g*T +s]] << " " ;
-                                    }
-                                    cout << endl ;
-                                }
-
-                                cout << endl ;
-                                cout << endl ;*/
-                            }
-                            fix=1 ;
-
-
-                            (branch.varLeft).add( x[i*T + time_t] ) ;
+                             //////// Mise à jour de branch left ////////
+                            (branch.varLeft).add( x[i*T + time_of_t] ) ;
                             nbFixs ++ ;
 
                             (branch.bLeft).add( bound ) ;
@@ -381,59 +368,10 @@ int SubPb::ComputeSubMatrixFixing(Branching & branch, int left, SubMatrices SubM
                                 (branch.dirLeft).add( IloCplex::BranchDown ) ;
                             }
                         }
-
-
                         else {
 
-
-                            if (!fix) {
-                                cout << "Fixing a " << node*left + (node+1)*!left << endl ;
-                                cout << "on the right" << endl ;
-                                cout << "Variable branchée : "<< "unit, time : " << unit << ", " << time  <<  endl ;
-                                cout << " x ? : " << varX << endl ;
-
-                                cout << "Fixing of unit i, time t : " << i << ", " << time_t << endl ;
-                                cout << "Group : " << FirstG[g] << ", " << LastG[g] << endl ;
-                                cout << "at bound : " << bound << endl ;
-                                cout << "values[(i)*T+ t] = " << values[(i)*T+t] << endl ;
-
-                                cout << "ordre des t : " ;
-                                for (int s=0 ; s <= finOrdre[g] ; s++) {
-                                    cout << timeOf[g*T + s] << " " ;
-                                }
-                                cout << endl ;
-
-                                for (int s= 0 ; s <= finOrdre[g] ; s++) {
-                                    for (int k = FirstG[g] ; k <= LastG[g] ; k++) {
-                                        cout << Xmin[k*T+s] << " " ;
-                                    }
-                                    cout << "          " ;
-                                    for (int k = FirstG[g] ; k <= LastG[g] ; k++) {
-                                        cout << values[k*T+s] << " " ;
-                                    }
-                                    cout << "          " ;
-                                    for (int k = FirstG[g] ; k <= LastG[g] ; k++) {
-                                        cout << Xmax[k*T+s] << " " ;
-                                    }
-                                    cout << "          " ;
-                                    cout << endl ;
-                                }
-
-                                /*cout << "u : " << endl ;
-                                for (int s= 0 ; s <= finOrdre[g] ; s++) {
-                                    for (int k = FirstG[g] ; k <= LastG[g] ; k++) {
-
-                                        cout << valuesU[k*T+timeOf[g*T +s]] << " " ;
-                                    }
-                                    cout << endl ;
-                                }
-
-                                cout << endl ;
-                                cout << endl ;*/
-                            }
-                            fix=1 ;
-
-                            (branch.varRight).add( x[i*T + time_t] );
+                             //////// Mise à jour de branch right ////////
+                            (branch.varRight).add( x[i*T + time_of_t] );
                             nbFixs ++ ;
                             (branch.bRight).add( bound ) ;
 
@@ -446,7 +384,6 @@ int SubPb::ComputeSubMatrixFixing(Branching & branch, int left, SubMatrices SubM
                         }
                     }
                 }
-
                 else { // min et max sont différents
                     if (Xmin[i*T+t] > Xmax[i*T+t] + eps) {
                         cout << "contradiction min et max pour i,t = " << i << ", " << t  << endl ;
@@ -458,7 +395,6 @@ int SubPb::ComputeSubMatrixFixing(Branching & branch, int left, SubMatrices SubM
             } // fin while
         }
     }
-
     return 0 ;
 }
 

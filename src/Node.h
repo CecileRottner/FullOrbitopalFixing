@@ -236,8 +236,9 @@ public :
     int setXmin(const SubMatrices & SubM, int tsub) ;
     int setXmax(const SubMatrices & SubM, int tsub) ;
 
-    int ComputeSubMatrixFixing(Branching & branch, int side, SubMatrices SubM, int tsub) ;
+    int ComputeSubMatrixFixing(Branching & branch, int side, const SubMatrices & SubM, int tsub) ;
     void doFixing(Branching & branch, int & pruneLeft, int & pruneRight) ;
+    void affichage(int left, int t, int g, int bound) ;
 
     int newVarU(Branching & branch, int nodes) ;
     int newVarUW(Branching & branch, int nodes) ;

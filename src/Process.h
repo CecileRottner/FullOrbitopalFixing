@@ -26,6 +26,7 @@ private:
     int doAggregatedModel ;
     int doDynamicFixing ;
     int doStaticFixing ;
+    int doSubFixing ;
     int doMob ;
     int doIup ; // UP+IUP
 
@@ -64,6 +65,7 @@ public:
         doAggregatedModel = 0 ;
         doStaticFixing = 0;
         doDynamicFixing = 0;
+        doSubFixing = 0 ;
         doSpecialBranching = 0 ;
         useNumU = 0 ;
         doMob = 0 ;
@@ -180,6 +182,10 @@ public:
         doSpecialBranching = 1 ;
     }
 
+    void UseSubFixing() {
+        doSubFixing = 1 ;
+    }
+
     void printParam()  {
         cout << "method nb: " << num << endl ;
         cout << "Cplex only: " << doCplex << endl ;
@@ -189,6 +195,7 @@ public:
         cout << "Agregated model: " << doAggregatedModel << endl ;
         cout << "Dynamic fixing: " << doDynamicFixing << endl ;
         cout << "Static fixing: " << doStaticFixing << endl ;
+        cout << "Sub fixing: " << doSubFixing << endl ;
         cout << "MOB: " << doMob << endl ;
         cout << "Use IUP: " << doIup << endl ;
         cout << "Lazy Callback: " << UseLazyCallback << endl ;
@@ -219,6 +226,7 @@ public:
     int StickToBranchingDecision() {return stickToCplexFirstBranchingDecision;}
     int NumU() {return useNumU;}
     int EmptyBranchCB() {return UseEmptyBranchCallback;}
+    int SubFixing() {return doSubFixing;}
 
 };
 

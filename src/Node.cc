@@ -32,6 +32,19 @@ SubMatrices::SubMatrices(IloEnv env, int n, int T, int nbG, int full) : T(T), n(
 
         }
     }
+
+    else {
+        for (int t = 0 ; t < T ; t++) {
+            ThereIsASet[t]=0 ;
+            for (int i=0 ; i < n ; i++) {
+                M[i*T+t]=0 ;
+            }
+            for (int g= 0 ; g < nbG ; g++) {
+                ThereIsASetForG[g*T+t] = 0 ;
+            }
+
+        }
+    }
 }
 
 int SubMatrices::inGroup(int i, int t) const {
@@ -60,6 +73,64 @@ int SubMatrices::SetAtT(int t) const {
     }
     return ThereIsASet[t] ;
 }
+
+void SubMatrices::setM(int i, int t, int val) {
+    if (i<0 || i >=n) {
+        cout << "indice unité non compris entre 0 et n-1 dans méthode inGroup" << endl ;
+    }
+    if (t<0 || t>=T) {
+        cout << "indice pas de temps non compris entre 0 et T-1 dans méthode inGroup" << endl ;
+    }
+    M[i*T+t] = val ;
+}
+
+void SubMatrices::setSetForG(int g, int t, int val) {
+    if (g<0 || g >=nbG) {
+        cout << "indice groupe non compris entre 0 et nbG-1 dans méthode SetForG" << endl ;
+    }
+    if (t<0 || t>=T) {
+        cout << "indice pas de temps non compris entre 0 et T-1 dans méthode SetForG" << endl ;
+    }
+    ThereIsASetForG[g*T+t] = val;
+}
+
+void SubMatrices::setSetAtT(int t, int val) {
+    if (t<0 || t>=T) {
+        cout << "indice pas de temps non compris entre 0 et T-1 dans méthode SetAtT" << endl ;
+    }
+    ThereIsASet[t]=val ;
+}
+
+void SubMatrices::printSubMatrix(int withSetGT, int withSetT) {
+    for (int t = 0 ; t <  T ; t++) {
+        cout << "t = " << t << " : ";
+        for (int i = 0 ; i < n ; i++) {
+            cout << M[i*T +t] << " " ;
+        }
+        cout << endl ;
+    }
+    cout << endl ;
+
+    if (withSetT) {
+        cout << endl ;
+        cout << "Sets for t : " << endl;
+        for (int t=0 ; t < T ; t++) {
+            cout << "(time " << t << ", " << ThereIsASet[t] << ") " << endl ;
+        }
+    }
+
+    if (withSetGT) {
+        for (int t = 0 ; t <  T ; t++) {
+            cout << "t = " << t << " : ";
+            for (int g = 0 ; g < nbG ; g++) {
+                cout << ThereIsASetForG[g*T +t] << " " ;
+            }
+            cout << endl ;
+        }
+        cout << endl ;
+    }
+}
+
 
 myNodeData::myNodeData(IloEnv env, int T,  int nbG, Methode methode) { // initialisation à la racine
     num=0 ;
@@ -145,6 +216,7 @@ SubPb::SubPb(IloEnv env, InstanceUCP* inst, IloBoolVarArray xx, IloBoolVarArray 
     instance=inst ;
 
     nbFixs = 0 ;
+    nbSubFixs = 0 ;
     timeFix = 0 ;
     unit=-1 ;
     time=-1 ;
@@ -238,6 +310,10 @@ SubPb::SubPb(IloEnv env, InstanceUCP* inst, IloBoolVarArray xx, IloBoolVarArray 
 
     Xmin = IloIntArray(env, n*T) ;
     Xmax = IloIntArray(env, n*T) ;
+
+    count_zeros = IloIntArray(env, n) ;
+    count_ones = IloIntArray(env, n) ;
+    lastFreeVar = IloIntArray(env, nbG) ;
 }
 
 
@@ -386,4 +462,94 @@ void SubPb::computeValuesU() {
 
         }
     }
+}
+
+
+void SubPb::updateRSU_RSD() {
+
+    for (int i = 0 ; i <n ; i++) {
+        count_zeros[i] = 0 ; // nombre de zeros avant le pas de temps de t pour unité i. Initialisation pour t=0.
+        count_ones[i] = 0 ; // nombre de uns avant le pas de temps de t pour unité i. Initialisation pour t=0.
+    }
+
+    for (int g = 0 ; g < nbG ; g++) {
+        lastFreeVar[g]  = -1;
+    }
+    for (int t = 0 ; t < T ; t++) {
+
+
+        int ThereIsASetInRSU = 0 ;
+        int ThereIsASetInRSD = 0 ;
+
+        for (int g = 0 ; g < nbG ; g++) {
+            int r = rankOf[g*T+t];
+            int RSU_diff_from_previous_t = 0 ;
+            int RSD_diff_from_previous_t = 0 ;
+
+            int last_g = LastG[g] ;
+            int first_g = FirstG[g] ;
+
+            for (int i = first_g ; i <= last_g ; i++) {
+
+                ///// RSU
+                if (count_zeros[i] >= instance->getl(i) ) {
+                    RSU.setM(i,t,1) ;
+                    if (count_zeros[i] == instance->getl(i) ) {
+                        RSU_diff_from_previous_t = 1 ;
+                        ThereIsASetInRSU=1 ;
+                    }
+                }
+                else { // si i n'est pas prête à démarrer, elle n'est pas dans le groupe.
+                    RSU.setM(i,t,0) ;
+                }
+
+
+                ////// RSD
+                if (count_ones[i] >= instance->getL(i) ) {
+                    RSD.setM(i,t,1) ;
+                    if (count_ones[i] == instance->getL(i) ) {
+                        RSD_diff_from_previous_t = 1 ;
+                        ThereIsASetInRSD=1 ;
+                    }
+                }
+                else { // si i n'est pas prête à démarrer, elle n'est pas dans le groupe.
+                    RSD.setM(i,t,0) ;
+                }
+
+                ///// Mise à jour des counts et de lastFreeVar
+                if (values[i*T+r] == 0) {
+                    count_ones[i] = 0 ;
+                    count_zeros[i]++ ;
+                }
+                else if (values[i*T+r] == 1) {
+                    count_ones[i]++ ;
+                    count_zeros[i]= 0 ;
+                }
+                else if  (values[i*T+r] == 8) {
+                    lastFreeVar[g] = t;
+                    count_zeros[i]= 0 ;
+                    count_ones[i] = 0 ;
+                }
+            }
+
+            RSU.setSetForG(g,t,RSU_diff_from_previous_t);
+            RSD.setSetForG(g,t,RSD_diff_from_previous_t);
+
+
+        } // fin for g
+
+        RSU.setSetAtT(t, ThereIsASetInRSU);
+        RSD.setSetAtT(t, ThereIsASetInRSD);
+
+    }
+
+    ///// Pour chaque group g, on vire les groupes liés à un t > lastFreeVar[g] (car tout est fixé en dessous de t pour g)
+   for (int g = 0 ; g < nbG ; g++) {
+       for (int t= lastFreeVar[g]+1 ; t < T ; t++) {
+           RSU.setSetForG(g,t,0);
+           RSD.setSetForG(g,t,0);
+       }
+   }
+
+    //RSU.printSubMatrix(0,1);
 }

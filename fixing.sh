@@ -10,7 +10,7 @@ T=48
 
 for sym in 4 3 2 ; do
   for id in {1..20}; do
-      ./mf 1 $dossier $n $T 1 3 $sym 0 0 $id
+      ./mf 3 $dossier $n $T 1 3 $sym 0 0 $id
   done
 done
 printf "\n" >> result.txt
@@ -22,7 +22,7 @@ T=96
 
 for sym in 4 3 2 ; do
   for id in {1..20}; do
-      ./mf 1 $dossier $n $T 1 3 $sym 0 0 $id
+      ./mf 3 $dossier $n $T 1 3 $sym 0 0 $id
   done
 done
 printf "\n" >> result.txt
@@ -34,7 +34,7 @@ T=192
 
 for sym in 4 3 2 ; do
   for id in {1..20}; do
-      ./mf 1 $dossier $n $T 1 3 $sym 0 0 $id
+      ./mf 3 $dossier $n $T 1 3 $sym 0 0 $id
   done
 done
 printf "\n" >> result.txt
@@ -46,7 +46,7 @@ T=288
 
 for sym in 3 2 ; do
   for id in {1..20}; do
-      ./mf 1 $dossier $n $T 1 3 $sym 0 0 $id
+      ./mf 3 $dossier $n $T 1 3 $sym 0 0 $id
   done
 done
 printf "\n" >> result.txt

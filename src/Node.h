@@ -31,6 +31,12 @@ public:
     int inGroup(int i, int t) const ;
     int SetForG(int g, int t) const ;
     int SetAtT(int t) const ;
+
+    void setM(int i, int t, int val) ;
+    void setSetForG(int g, int t, int val)  ;
+    void setSetAtT(int t, int val) ;
+
+    void printSubMatrix(int withSetGT=0, int withSetT=0) ;
     ~SubMatrices() {
         M.end() ;
         ThereIsASet.end();
@@ -171,6 +177,12 @@ public :
     IloIntArray Xmin ;
     IloIntArray Xmax ;
 
+    //Vecteurs utiles pour la mise à jour de RSU et RSD. On les met dans la classe SubPb histoire de ne les allouer qu'une seule fois dans tout l'arbre. Mais ils servent que dans updateRSU_RSD.
+    IloIntArray count_zeros ;
+    IloIntArray count_ones ;
+    IloIntArray lastFreeVar ;
+
+
     //à partir de varID, méthode update calcule les indicateurs suivants:
     int unit ;
     int group ; //groupe de symétrie de l'unité unit
@@ -184,6 +196,7 @@ public :
     //temps et nombre de fixing : se cumulent d'un noeud à l'autre
     double timeFix ; //temps nécessaire aux opérations de fixing / branching
     int nbFixs ; //nombres d'opérations de fixing
+    int nbSubFixs ;
 
     SubPb(IloEnv env, InstanceUCP* inst, IloBoolVarArray xx, IloBoolVarArray uu, IloNum epsilon, Methode methode) ;
     ~SubPb() {
@@ -231,14 +244,16 @@ public :
     void computeValuesU() ;
     void getVar(int varID, int & unit, int & time, int & varX) ;
 
+    void updateRSU_RSD() ;
+
     // Calcul de Xmin et Xmax de la sous matrice donnée par les unités de la ligne t de SubM.M (colonnes à 1), pour les pas de temps de t à T.
     //Le fixing est fait au sein de chaque groupe de symétrie comme pour le fixing global.
     int setXmin(const SubMatrices & SubM, int tsub) ;
     int setXmax(const SubMatrices & SubM, int tsub) ;
 
     int ComputeSubMatrixFixing(Branching & branch, int side, const SubMatrices & SubM, int tsub) ;
-    void doFixing(Branching & branch, int & pruneLeft, int & pruneRight) ;
-    void affichage(int left, int t, int g, int bound) ;
+    void doFixing(Branching & branch, int & pruneLeft, int & pruneRight, int subfixing) ;
+    void affichage(int left, int t, int g, int bound, const SubMatrices & SubM, int tsub) ;
 
     int newVarU(Branching & branch, int nodes) ;
     int newVarUW(Branching & branch, int nodes) ;

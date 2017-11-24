@@ -117,7 +117,7 @@ ILOBRANCHCALLBACK4(BCallBack, Methode &, methode, SubPb &, sub, myNodeData*, dat
 
                 getBranch(branch.varLeft, branch.bLeft, branch.dirLeft, 0) ;
                 getBranch(branch.varRight, branch.bRight, branch.dirRight, 1) ;
-                sub.doFixing(branch, pruneLeft, pruneRight) ;
+                sub.doFixing(branch, pruneLeft, pruneRight, methode.SubFixing()) ;
             }
 
             else {
@@ -137,7 +137,7 @@ ILOBRANCHCALLBACK4(BCallBack, Methode &, methode, SubPb &, sub, myNodeData*, dat
                     getBranch(branch.varRight, branch.bRight, branch.dirRight, 1) ;
                 }
 
-                sub.doFixing(branch, pruneLeft, pruneRight) ;
+                sub.doFixing(branch, pruneLeft, pruneRight, methode.SubFixing()) ;
 
             }
         }
@@ -363,6 +363,7 @@ int process(InstanceProcessed I, ofstream & fichier, double & time, Methode met,
     fichier << " & " << cplex.getMIPRelativeGap() << " \\% " ; //approx gap
     fichier << " & " << cplex.getNnodes() ;
     fichier << " & " << sub.nbFixs ;
+    fichier << " & " << sub.nbSubFixs ;
     fichier << " & " << sub.timeFix ;
     fichier << " & " << t - time ;
     if (sub.UB_LB) {
@@ -377,7 +378,6 @@ int process(InstanceProcessed I, ofstream & fichier, double & time, Methode met,
     delete dataNode ;
     // env.end() ;
     return opt;
-    return 0 ;
 }
 
 
@@ -427,6 +427,11 @@ main(int argc,char**argv)
     //StaticFix.AddIneqSum() ;
     //StaticFix.DontUseLazyCB();
 
+    Methode StaticSubFix ;
+    StaticSubFix.UseStaticFixing() ;
+    StaticSubFix.UseSubFixing() ;
+    StaticSubFix.setNum(22);
+
     Methode StaticFixWithIneq ;
     StaticFixWithIneq.UseStaticFixing() ;
     StaticFixWithIneq.AddIneqSum() ;
@@ -455,6 +460,11 @@ main(int argc,char**argv)
 
     Methode DynamicFix ;
     DynamicFix.UseDynamicFixing() ;
+
+    Methode DynamicSubFix ;
+    DynamicSubFix.UseDynamicFixing() ;
+    DynamicSubFix.UseSubFixing() ;
+    DynamicSubFix.setNum(44);
 
 
     /////////////////////// SI ARGUMENTS //////////////////////
@@ -513,6 +523,32 @@ main(int argc,char**argv)
             env.end() ;
         }
 
+        if (met==3) {
+
+            env=IloEnv() ;
+            int opt= process(Instance, fichier, time, DefaultCplex , env) ;
+            env.end() ;
+
+            env=IloEnv() ;
+            process(Instance, fichier, time, DynamicFix , env) ;
+            env.end() ;
+
+            env=IloEnv() ;
+            int solution_fixing_static = process(Instance, fichier, time, StaticSubFix , env) ;
+            env.end() ;
+
+            env=IloEnv() ;
+            int solution_fixing = process(Instance, fichier, time, DynamicSubFix , env) ;
+            env.end() ;
+
+            if (fabs(opt-solution_fixing) > 0.0000001 ) {
+                fichier << "ERREUR" << endl ;
+            }
+            if (fabs(opt-solution_fixing_static) > 0.0000001 ) {
+                fichier << "ERREUR" << endl ;
+            }
+        }
+
         /*env=IloEnv() ;
         process(Instance, fichier, time, IneqPures, env) ;
         env.end() ;
@@ -557,7 +593,7 @@ main(int argc,char**argv)
         //Paramètres de l'instance
 
         int T = 96;
-        int n = 30 ;
+        int n = 60 ;
         int sym = 2 ;
         int demande = 3;
         int cat01 = 0;
@@ -575,19 +611,19 @@ main(int argc,char**argv)
         Instance.T=T ;
         IloEnv env ;
 
-        for (sym= 4; sym >=4 ; sym--) {
+        for (sym= 2; sym >=2 ; sym--) {
             Instance.symetrie = sym ;
-            for (int id=3; id <=3; id++) {
+            for (int id=1; id <=20; id++) {
                 Instance.id = id ;
 
-                /*env=IloEnv() ;
-                process(Instance, fichier, time, DefaultCplex, env) ;
+                env=IloEnv() ;
+                int opt = process(Instance, fichier, time, DefaultCplex, env) ;
                 env.end() ;
 
 
 
-                env=IloEnv() ;
-                process(Instance, fichier, time, AggregModel , env) ;
+                /*env=IloEnv() ;
+                 process(Instance, fichier, time, AggregModel , env) ;
                 env.end() ;
 
                 env=IloEnv() ;
@@ -597,6 +633,14 @@ main(int argc,char**argv)
                 env=IloEnv() ;
                 process(Instance, fichier, time, DynamicFix , env) ;
                 env.end() ;
+
+                env=IloEnv() ;
+                int solution_fixing = process(Instance, fichier, time, DynamicSubFix , env) ;
+                env.end() ;
+
+                if (fabs(opt-solution_fixing) > 0.0000001 ) {
+                    fichier << "ERREUR" << endl ;
+                }
 
                 /*env=IloEnv() ;
                 process(Instance, fichier, time, IneqCB, env) ;

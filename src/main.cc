@@ -307,7 +307,7 @@ int process(InstanceProcessed I, ofstream & fichier, double & time, Methode met,
     cplex.setParam(IloCplex::Param::ClockType, 1); //1 : CPU TIME
     cplex.setParam(IloCplex::Param::Threads, 1);
     cplex.setParam(IloCplex::EpGap, 0.0000001) ;
-    cplex.setParam(IloCplex::Param::TimeLimit, 3600) ;
+    cplex.setParam(IloCplex::Param::TimeLimit, 30) ;
 
 
     //Résolution et affichage de la solution
@@ -371,13 +371,15 @@ int process(InstanceProcessed I, ofstream & fichier, double & time, Methode met,
     }
     fichier <<" \\\\ " << endl ;
 
+    bool short_time = ((t-time)<30) ;
     time = t ;
 
     //Destructeurs
     delete inst ;
     delete dataNode ;
     // env.end() ;
-    return opt;
+
+    return short_time;
 }
 
 
@@ -599,7 +601,7 @@ main(int argc,char**argv)
         int cat01 = 0;
         int bloc = 1;
         int intra = 0 ;
-        string localisation = "data/Litt_Real/" ;
+        string localisation = "data/Test/" ;
         InstanceProcessed Instance = InstanceProcessed(n, T, bloc, demande, sym, cat01, intra, 0, localisation) ;
 
         fichier << localisation << endl ;
@@ -611,16 +613,15 @@ main(int argc,char**argv)
         Instance.T=T ;
         IloEnv env ;
 
-        for (sym= 2; sym >=2 ; sym--) {
+        for (sym= 5; sym >=5 ; sym--) {
             Instance.symetrie = sym ;
+            int count=0 ;
             for (int id=1; id <=20; id++) {
                 Instance.id = id ;
 
                 env=IloEnv() ;
-                int opt = process(Instance, fichier, time, DefaultCplex, env) ;
+                count+= process(Instance, fichier, time, DefaultCplex , env) ;
                 env.end() ;
-
-
 
                 /*env=IloEnv() ;
                  process(Instance, fichier, time, AggregModel , env) ;
@@ -628,19 +629,19 @@ main(int argc,char**argv)
 
                 env=IloEnv() ;
                 process(Instance, fichier, time, IneqPures, env) ;
+                env.end() ;
+
+               env=IloEnv() ;
+                process(Instance, fichier, time, DynamicFix , env) ;
                 env.end() ;*/
 
-                env=IloEnv() ;
-                process(Instance, fichier, time, DynamicFix , env) ;
-                env.end() ;
-
-                env=IloEnv() ;
+               /* env=IloEnv() ;
                 int solution_fixing = process(Instance, fichier, time, DynamicSubFix , env) ;
-                env.end() ;
+                env.end() ;*/
 
-                if (fabs(opt-solution_fixing) > 0.0000001 ) {
+               /*  if (fabs(opt-solution_fixing) > 0.0000001 ) {
                     fichier << "ERREUR" << endl ;
-                }
+                }*/
 
                 /*env=IloEnv() ;
                 process(Instance, fichier, time, IneqCB, env) ;
@@ -662,6 +663,8 @@ main(int argc,char**argv)
 
                 fichier << endl ;
             }
+            fichier << "nb time<30 : " << count << endl;
+            count=0 ;
             fichier << endl ;
             fichier << endl ;
         }

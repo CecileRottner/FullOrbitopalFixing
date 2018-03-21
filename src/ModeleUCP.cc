@@ -116,6 +116,12 @@ IloModel defineModel(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, con
 
 }
 
+IloModel defineModel(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, const IloBoolVarArray & u) {
+
+    IloModel model = defineModel(env, pb, x, u, 0) ;
+
+    // ajout des contraintes de ramp
+}
 
 IloModel defineModel_y(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, const IloBoolVarArray & u) {
 

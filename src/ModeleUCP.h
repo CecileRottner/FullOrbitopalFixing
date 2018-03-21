@@ -8,6 +8,9 @@
 
 IloModel defineModel(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, const IloBoolVarArray & u, int uNum) ;
 
+IloModel defineModelRamp(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, const IloBoolVarArray & u) ;
+
+
 IloModel defineModel_y(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, const IloBoolVarArray & u) ;
 IloModel defineModel_numberOfOnes(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, const IloBoolVarArray & u) ;
 

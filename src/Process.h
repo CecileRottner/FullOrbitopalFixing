@@ -50,7 +50,7 @@ private:
 public:
 
     int allGroups ;
-    int StopNode ;
+   // int StopNode ;
 
     //Constructeur (par défault c'est Cplex Default)
     Methode() {// crée Cplex default
@@ -79,7 +79,7 @@ public:
         CteRamping = 0 ;
 
         //indicateurs à l'arrache
-        StopNode=10 ;
+       // StopNode=10 ;
         allGroups=0 ;
 
     }

@@ -122,7 +122,8 @@ ILOBRANCHCALLBACK4(BCallBack, Methode &, methode, SubPb &, sub, myNodeData*, dat
 
             else {
                 int newVar = 0 ;
-                if (getNnodes() < methode.StopNode ) {
+                int stopNode = 10 ;
+                if (getNnodes() < stopNode ) {
 
                     getValues(sub.x_frac,sub.x);
                     if (methode.allGroups) {
@@ -291,9 +292,9 @@ int process(InstanceProcessed I, ofstream & fichier, double & time, Methode met,
 
     else {
         model = defineModel(env,inst,x,u,met.NumU(), ramp) ;
-//        if (met.RSUonly()) {
-//            AddRSUIneq(model, env, inst, x, u,0);
-//        }
+        if (met.RSUonly()) {
+            AddRSUIneq(model, env, inst, x, u,0);
+        }
     }
 
 
@@ -318,7 +319,7 @@ int process(InstanceProcessed I, ofstream & fichier, double & time, Methode met,
     cplex.setParam(IloCplex::Param::ClockType, 1); //1 : CPU TIME
     cplex.setParam(IloCplex::Param::Threads, 1);
     cplex.setParam(IloCplex::EpGap, 0.0000001) ;
-    cplex.setParam(IloCplex::Param::TimeLimit, 10) ;
+    cplex.setParam(IloCplex::Param::TimeLimit, 3600) ;
 
 
     //Résolution et affichage de la solution
@@ -473,7 +474,7 @@ main(int argc,char**argv)
     StaticFixWithBranching_50.AddIneqSum() ;
     StaticFixWithBranching_50.DontUseLazyCB();
     StaticFixWithBranching_50.UseSpecialBranching();
-    StaticFixWithBranching_50.StopNode = 50;
+   // StaticFixWithBranching_50.StopNode = 50;
 
 
     Methode StaticFixWithBranching_all ;
@@ -643,11 +644,9 @@ main(int argc,char**argv)
                 Instance.id = id ;
 
 
-                env=IloEnv() ;
-                process(Instance, fichier, time, DefaultCplex, env) ;
-                env.end() ;
 
-                /*env=IloEnv() ;
+
+                env=IloEnv() ;
                 cout <<"start ramp model" << endl ;
                 process(Instance, fichier, time, RampModel , env) ;
                 cout <<"end ramp model" << endl ;
@@ -656,7 +655,7 @@ main(int argc,char**argv)
 
                 env=IloEnv() ;
                 process(Instance, fichier, time, RampIneqRSU, env) ;
-                env.end() ;*/
+                env.end() ;
 
 
                 /* env=IloEnv() ;

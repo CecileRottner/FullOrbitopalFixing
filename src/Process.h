@@ -20,6 +20,7 @@ private:
     // méthodes de résolution
     int doCplex ;
     int doIneqSum ;
+    int doRSUOnly ;
     int doIneqVarY ;
     int doModeleFlot ;
     int doNumberOfOnes ;
@@ -43,10 +44,13 @@ private:
 
     int useNumU ; //u definie comme variable continue dans le modèle
 
+    //contraintes
+    int CteRamping ;
+
 public:
 
     int allGroups ;
-    int StopNode ;
+   // int StopNode ;
 
     //Constructeur (par défault c'est Cplex Default)
     Methode() {// crée Cplex default
@@ -59,6 +63,7 @@ public:
         UseEmptyBranchCallback = 0 ;
         UseCutCallback  = 0;
         doIneqSum = 0;
+        doRSUOnly = 0 ;
         doIneqVarY = 0;
         doModeleFlot =0 ;
         doNumberOfOnes = 0 ;
@@ -71,8 +76,10 @@ public:
         doMob = 0 ;
         doIup = 0 ;
 
+        CteRamping = 0 ;
+
         //indicateurs à l'arrache
-        StopNode=10 ;
+       // StopNode=10 ;
         allGroups=0 ;
 
     }
@@ -92,6 +99,8 @@ public:
 
     void DoStickToBranchingDecisions() { stickToCplexFirstBranchingDecision=1;}
     void DontStickToBranchingDecisions() { stickToCplexFirstBranchingDecision=0;}
+
+    void AddIneqRSU() {doRSUOnly=1;}
 
 
 
@@ -186,10 +195,17 @@ public:
         doSubFixing = 1 ;
     }
 
+    void UseRampConstraints() {
+        num=-3 ;
+        doCplex=0 ;
+        CteRamping=1 ;
+    }
+
     void printParam()  {
         cout << "method nb: " << num << endl ;
         cout << "Cplex only: " << doCplex << endl ;
         cout << "Use sub symmetry ineq: " << doIneqSum << endl ;
+        cout << "Use RSU sub symmetry ineq only: " << doRSUOnly << endl ;
         cout << "Use variables y: " << doIneqVarY<< endl ;
         cout << "Use modèle flot: " << doModeleFlot << endl ;
         cout << "Agregated model: " << doAggregatedModel << endl ;
@@ -205,6 +221,7 @@ public:
         cout << "Special branching: " << doSpecialBranching << endl ;
         cout << "Stick to Cplex first branching decision: " << stickToCplexFirstBranchingDecision << endl ;
         cout << "Use continuous u variable: " << useNumU << endl ;
+        cout << "Ramping constraints: " << CteRamping << endl ;
     }
 
     //accès aux paramètres
@@ -227,6 +244,8 @@ public:
     int NumU() {return useNumU;}
     int EmptyBranchCB() {return UseEmptyBranchCallback;}
     int SubFixing() {return doSubFixing;}
+    int Ramping() {return CteRamping;}
+    int RSUonly() {return doRSUOnly;}
 
 };
 

@@ -282,9 +282,9 @@ void SubPb::updateValues(int side) { // on considère la matrice de la solution 
 }
 
 
-void SubPb::affichage(int left, int t, int i, int bound, const SubMatrices & SubM, int tsub) {
+void SubPb::affichage(int left, int t, int unit_i, int bound, const SubMatrices & SubM, int tsub) {
 
-    int g = Group[i] ;
+    int g = Group[unit_i] ;
     int time_of_t = timeOf[g*T + t] ;
 
     if (tsub >0) {
@@ -306,10 +306,10 @@ void SubPb::affichage(int left, int t, int i, int bound, const SubMatrices & Sub
         cout << "Variable branchée : "<< "unit, time : " << unit << ", " << time << endl ;
         cout << " x ? : " << varX << endl ;
 
-        cout << "Fixing of unit i, time t : " << i << ", " << time_of_t << endl ;
+        cout << "Fixing of unit i, time t : " << unit_i << ", " << time_of_t << endl ;
         cout << "Group : " << FirstG[g] << ", " << LastG[g] << endl ;
         cout << "at bound : " << bound << endl ;
-        cout << "values[(i)*T+ t] = " << values[(i)*T+t] << endl ;
+        cout << "values[(i)*T+ t] = " << values[(unit_i)*T+t] << endl ;
 
         cout << "ordre des t : " ;
         for (int s=0 ; s <= finOrdre[g] ; s++) {

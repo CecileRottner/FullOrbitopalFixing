@@ -6,7 +6,8 @@
 using namespace std ;
 
 
-IloModel defineModel(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, const IloBoolVarArray & u, int uNum) {
+IloModel defineModel(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, const IloBoolVarArray & u, int uNum, int ramp) {
+
 
     IloModel model = IloModel(env);
 
@@ -107,20 +108,77 @@ IloModel defineModel(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, con
         model.add(IloConversion(env, u, IloNumVar::Float) ) ;
     }
 
-   /* model.add(IloConversion(env, x, IloNumVar::Float) ) ;
+    /* model.add(IloConversion(env, x, IloNumVar::Float) ) ;
     model.add(IloConversion(env, u, IloNumVar::Float) ) ;*/
 
     // pp.end() ;
+
+    if (ramp==1) {
+        for (i = 0 ; i <n ; i++) {
+            for (t = 1 ; t < T ; t++) {
+                model.add(pp[i*T + t] - pp[i*T + t-1] <= (pb->getPmax(i)-pb->getP(i))*x[i*T + t-1]/3 + pb->getP(i)*u[i*T + t] );
+                model.add(pp[i*T + t-1] - pp[i*T + t] <= (pb->getPmax(i)-pb->getP(i))*x[i*T + t]/2 + pb->getP(i)*(u[i*T + t] + x[i*T + t-1] - x[i*T + t] ));
+            }
+        }
+    }
 
     return model ;
 
 }
 
 
+
+void AddRSUIneq(IloModel & model, IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, const IloBoolVarArray & u, int methode) {
+
+    // methode=-4 : inégalité pour chaque couple (i,j)
+    // par défaut : seulement couple (i,i+1)
+
+    // ajout des inégalités Ready to Start Up
+    int T = pb->getT() ;
+
+    for (int g=0 ; g < pb->nbG ; g++) {
+
+        int first = pb->FirstG[g] ;
+        int last = pb->LastG[g] ;
+
+        for (int i=first ; i < last ; i++) {
+
+            int l = pb->getl(i) ;
+
+            int ub_j = i+1 ;
+            if (methode == -4) {
+                ub_j=last ;
+            }
+
+            for (int t = l ; t < T ; t++) {
+
+                IloExpr rhs(env) ;
+                rhs += x[i*T+t] + x[i*T+t - l];
+
+                for (int k=t -l + 1 ; k < t ; k++) {
+                    rhs+= u[i*T+k] ;
+                }
+
+                for (int j=i+1 ; j <= ub_j ; j++) {
+                    model.add(u[j*T + t] <= rhs) ;
+                }
+            }
+
+            if (pb->getInit(i)==0) {
+                for (int j=i+1 ; j <= ub_j ; j++) {
+                    for (int t = 0 ; t < l ; t++) {
+                        model.add(x[j*T+t] <= x[i*T+t]) ;
+                    }
+                }
+            }
+        }
+    }
+}
+
 IloModel defineModel_y(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, const IloBoolVarArray & u) {
 
 
-    IloModel model = defineModel(env, pb, x, u, 0) ;
+    IloModel model = defineModel(env, pb, x, u, 0,0) ;
 
 
     int n = pb->getn();
@@ -163,7 +221,7 @@ IloModel defineModel_numberOfOnes(IloEnv env, InstanceUCP* pb, const IloBoolVarA
     int T = pb->getT() ;
     IloModel model  ;
     int k ;
-    model = defineModel(env, pb, x, u, 0) ;
+    model = defineModel(env, pb, x, u, 0,0) ;
 
     for (int g=0 ; g < pb->nbG ; g++) {
 
@@ -196,7 +254,7 @@ IloModel defineModel_sum(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x,
     }
 
     else{
-        model = defineModel(env, pb, x, u, 0) ;
+        model = defineModel(env, pb, x, u, 0,0) ;
     }
 
     int T = pb->getT() ;

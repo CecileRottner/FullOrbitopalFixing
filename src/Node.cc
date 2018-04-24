@@ -169,7 +169,7 @@ myNodeData::myNodeData(IloEnv env, myNodeData* data, int group, int time, int va
 
     if (varX==0 && time>0) { // on ordonne aussi time-1
 
-        if ( rankOf[group*T + time-1] > finOrdre[group] /*&& feasibility != 2*/) { // time n'a pas encore été ordonné définitivement
+        if ( rankOf[group*T + time-1] > finOrdre[group] /*&& feasibility != 2*/) { // time-1 n'a pas encore été ordonné définitivement
 
             finOrdre[group] ++ ;
             int tmp_rank = rankOf[group*T + time-1] ; // le rang de time avant le réordonnancement

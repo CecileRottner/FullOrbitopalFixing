@@ -20,7 +20,6 @@ InstanceUCP::InstanceUCP(IloEnv envir, const char* file) {
 void InstanceUCP::Initialise() {
 
     //calculs symétries
-
     nbG=0 ;
 
     for (int i = 0 ; i <n ; i++) {
@@ -50,6 +49,7 @@ void InstanceUCP::Initialise() {
             nb++ ;
         }
     }
+
 
 
 
@@ -116,16 +116,19 @@ void InstanceUCP::Initialise() {
 
 
 
+
     SommePmax = 0 ;
     for (int j = 0 ; j <n ; j++) {
         SommePmax += Pmax[j] ;
     }
 
+
     //Calcul des indicateurs de symétries
 
     SizeG = IloIntArray(env, nbG) ;
 
-    repartition_tailles = IloIntArray(env, n) ;
+
+    repartition_tailles = IloIntArray(env, n+1) ;
     for (int i=0 ; i <n ; i++) {
         repartition_tailles[i] = 0 ;
     }
@@ -148,9 +151,12 @@ void InstanceUCP::Initialise() {
             }
         }
         else {
+
             groupSize++ ;
             repartition_tailles[groupSize]++ ;
             SizeG[group_ind] = groupSize ;
+
+
             if (!First[i]) {
                 MeanSize+=groupSize ;
                 if (MaxSize < groupSize) {
@@ -165,7 +171,6 @@ void InstanceUCP::Initialise() {
     cout << "First : " << First << endl ;
     cout << "Size : " << SizeG << endl ;
     MeanSize = MeanSize / nbG2;
-
 
     nb=0 ;
 
@@ -200,6 +205,7 @@ void InstanceUCP::Initialise() {
     ////// Indicateurs pour le branchement maison
 
     ordre_ratio = IloIntArray(env, n) ;
+
     //demande
 
     /*Dmin = SommePmax ;

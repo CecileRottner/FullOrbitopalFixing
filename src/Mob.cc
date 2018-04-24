@@ -88,10 +88,11 @@ int ComputeB(int orbitFirst, int orbitLast, const SubPb & sub) {
     return fmax(1, b);
 }
 
-void doMOB(Branching & branch, SubPb & sub) {
+int doMOB(Branching & branch, SubPb & sub) {
 
     // il faut vérifier varX=1
 
+    int alert=0 ;
     int T= sub.T ;
     int n = sub.n ;
 
@@ -106,6 +107,7 @@ void doMOB(Branching & branch, SubPb & sub) {
 
     if (sub.varX == 0) {
 
+        alert=1 ;
         cout << "branchement sur u(" << sub.unit << ", " << sub.time << ")" << endl ;
         cout << "at node : " << sub.node << endl ;
 
@@ -217,7 +219,7 @@ void doMOB(Branching & branch, SubPb & sub) {
     }
     sub.nbFixs -= 2 ; //on retire les variables qui auraient été fixées de toute façon
 
-
+    return alert ;
 }
 
 #endif

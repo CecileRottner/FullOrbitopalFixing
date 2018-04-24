@@ -56,9 +56,9 @@ ILOBRANCHCALLBACK4(BCallBack, Methode &, methode, SubPb &, sub, myNodeData*, dat
         int varX ;
         sub.getVar(varID, unit, time, varX) ;
 
-
+        int test=0 ; // test=1 si on veut afficher le père de chacun des noeuds; dans ce cas on garde une info différente dans chaque noeud
         //////////// Mise à jour de nodeData (ordre des variables) /////////////
-        if (getNnodes() != 0 && methode.DynamicFixing() ) { // si on est à la racine, pas de data dans le noeud courant, data est "vide. // si on utilise une methode à ordre fixe on peut garder le même nodeData tout le long
+        if (getNnodes() != 0 && (methode.DynamicFixing() || test)) { // si on est à la racine, pas de data dans le noeud courant, data est "vide. // si on utilise une methode à ordre fixe on peut garder le même nodeData tout le long
             data = dynamic_cast <myNodeData *> (getNodeData()) ; // sinon on récupère le nodeData du noeud courant
         }
 
@@ -72,7 +72,7 @@ ILOBRANCHCALLBACK4(BCallBack, Methode &, methode, SubPb &, sub, myNodeData*, dat
         myNodeData* dataFils = data ;
         myNodeData* dataFils2 = data ;
 
-        if ( methode.DynamicFixing() ) {
+        if ( methode.DynamicFixing() || test) {
             dataFils = new myNodeData(getEnv(), data, sub.Group[unit], time, varX, sub.feasible[unit*T+time], sub.T, sub.nbG) ;
             dataFils2 = new myNodeData(getEnv(), data, sub.Group[unit], time, varX, sub.feasible[unit*T+time], sub.T, sub.nbG) ;
 
@@ -83,6 +83,8 @@ ILOBRANCHCALLBACK4(BCallBack, Methode &, methode, SubPb &, sub, myNodeData*, dat
         dataFils2->num=count ;
 
 
+
+
         //////////// Mise à jour de sub ///////////////
 
         if ( !methode.CplexOnly() ) {
@@ -91,6 +93,7 @@ ILOBRANCHCALLBACK4(BCallBack, Methode &, methode, SubPb &, sub, myNodeData*, dat
             sub.update(varID, dataFils);
         }
 
+        int alert = 0 ;
         /////////// Méthodes ////////////
         Branching branch= Branching(getEnv()) ;
         int pruneLeft = 0;
@@ -104,7 +107,7 @@ ILOBRANCHCALLBACK4(BCallBack, Methode &, methode, SubPb &, sub, myNodeData*, dat
         if ( methode.Mob() ) { // MOB
             getValues(sub.x_frac,sub.x); // MOB : on a besoin des valeurs fractionnaires de x
 
-            doMOB(branch, sub) ;
+            alert = doMOB(branch, sub) ;
         }
 
 
@@ -179,7 +182,7 @@ ILOBRANCHCALLBACK4(BCallBack, Methode &, methode, SubPb &, sub, myNodeData*, dat
                 cout << endl ;
             }
 
-            if (methode.DynamicFixing() ) {
+            if (methode.DynamicFixing() || test) {
                 makeBranch(branch.varLeft, branch.bLeft, branch.dirLeft, getObjValue(), dataFils) ;
             }
             else {
@@ -208,7 +211,7 @@ ILOBRANCHCALLBACK4(BCallBack, Methode &, methode, SubPb &, sub, myNodeData*, dat
                 cout << "xt-1 : "<< getLB(sub.x[unit*T + sub.time-1]) << ", " << getUB(sub.x[unit*T + sub.time-1]) << endl ;*/
                 cout << endl ;
             }
-            if ( methode.DynamicFixing() ) {
+            if ( methode.DynamicFixing() || test) {
                 makeBranch(branch.varRight, branch.bRight, branch.dirRight, getObjValue(), dataFils2) ;
             }
             else {
@@ -286,6 +289,7 @@ int process(InstanceProcessed I, ofstream & fichier, double & time, Methode met,
     else {
         model = defineModel(env,inst,x,u,met.NumU()) ;
     }
+
 
     IloCplex cplex(model) ;
     IloNum eps = cplex.getParam(IloCplex::Param::Simplex::Tolerances::Feasibility) ;
@@ -469,7 +473,7 @@ main(int argc,char**argv)
 
     /////////////////////// SI ARGUMENTS //////////////////////
     if (argc>1) {
-        ofstream fichier("result.txt", std::ofstream::out | std::ofstream::app);
+
 
         int met= atoi(argv[1]);
         string localisation = argv[2] ;
@@ -485,97 +489,45 @@ main(int argc,char**argv)
 
         int id = atoi(argv[10]);
 
+        string nom = argv[11] ;
+
+        ofstream fichier(nom, std::ofstream::out | std::ofstream::app);
+
         InstanceProcessed Instance = InstanceProcessed(n, T, bloc, demande, sym, cat01, intra, id, localisation) ;
 
         double time = 0 ;
         IloEnv env ;
 
-        if (met==1) {
-
+        if (met==-1) {
             env=IloEnv() ;
-            process(Instance, fichier, time, DefaultCplex, env) ;
+            double solCplx = process(Instance, fichier, time, DefaultCplex, env) ;
             env.end() ;
-
+        }
+        if (met==0) {
             env=IloEnv() ;
             process(Instance, fichier, time, CBCplex, env) ;
             env.end() ;
-
+        }
+        if (met==1) {
             env=IloEnv() ;
             process(Instance, fichier, time, Mob, env) ;
             env.end() ;
-
+        }
+        if (met==2) {
+            env=IloEnv() ;
+            process(Instance, fichier, time, StaticFix, env) ;
+            env.end() ;
+        }
+        if (met==4) {
             env=IloEnv() ;
             process(Instance, fichier, time, DynamicFix, env) ;
             env.end() ;
         }
-
-        if (met==2) {
+        if (met==44) {
             env=IloEnv() ;
-            process(Instance, fichier, time, DefaultCplex, env) ;
-            env.end() ;
-
-            env=IloEnv() ;
-            process(Instance, fichier, time, IneqPures, env) ;
-            env.end() ;
-
-            env=IloEnv() ;
-            process(Instance, fichier, time, StaticFixWithIneq, env) ;
+            process(Instance, fichier, time, DynamicSubFix , env) ;
             env.end() ;
         }
-
-        if (met==3) {
-
-            env=IloEnv() ;
-            int opt= process(Instance, fichier, time, DefaultCplex , env) ;
-            env.end() ;
-
-            env=IloEnv() ;
-            process(Instance, fichier, time, DynamicFix , env) ;
-            env.end() ;
-
-            env=IloEnv() ;
-            int solution_fixing_static = process(Instance, fichier, time, StaticSubFix , env) ;
-            env.end() ;
-
-            env=IloEnv() ;
-            int solution_fixing = process(Instance, fichier, time, DynamicSubFix , env) ;
-            env.end() ;
-
-            if (fabs(opt-solution_fixing) > 0.0000001 ) {
-                fichier << "ERREUR" << endl ;
-            }
-            if (fabs(opt-solution_fixing_static) > 0.0000001 ) {
-                fichier << "ERREUR" << endl ;
-            }
-        }
-
-        /*env=IloEnv() ;
-        process(Instance, fichier, time, IneqPures, env) ;
-        env.end() ;
-
-        env=IloEnv() ;
-        process(Instance, fichier, time, IneqCB, env) ;
-        env.end() ;
-
-        env=IloEnv() ;
-        process(Instance, fichier, time, StaticFix, env) ;
-        env.end() ;*/
-
-        /* env=IloEnv() ;
-        process(Instance, fichier, time, StaticFixWithBranching, env) ;
-        env.end() ;*/
-
-
-        /*   env=IloEnv() ;
-        process(Instance, fichier, time, StaticFixWithBranching_50, env) ;
-        env.end() ;
-
-
-        env=IloEnv() ;
-        process(Instance, fichier, time, StaticFixWithBranching_all, env) ;
-        env.end() ; */
-
-        fichier << endl ;
 
 
     }
@@ -592,34 +544,37 @@ main(int argc,char**argv)
 
         //Paramètres de l'instance
 
-        int T = 96;
-        int n = 60 ;
-        int sym = 2 ;
+        int T = 24;
+        int n = 10 ;
+        int sym = 3 ;
         int demande = 3;
         int cat01 = 0;
         int bloc = 1;
-        int intra = 0 ;
-        string localisation = "data/Litt_Real/" ;
+        int intra = 1 ;
+        string localisation = "data/datacolgen/" ;
         InstanceProcessed Instance = InstanceProcessed(n, T, bloc, demande, sym, cat01, intra, 0, localisation) ;
 
         fichier << localisation << endl ;
         Instance.localisation = localisation ;
 
         n=60;
-        T=48;
+        T=96;
         Instance.n=n;
         Instance.T=T ;
         IloEnv env ;
 
-        for (sym= 2; sym >=2 ; sym--) {
+        for (sym= 1; sym >=1 ; sym--) {
             Instance.symetrie = sym ;
-            for (int id=1; id <=20; id++) {
+            for (int id=1; id <=1; id++) {
                 Instance.id = id ;
 
                 env=IloEnv() ;
                 int opt = process(Instance, fichier, time, DefaultCplex, env) ;
                 env.end() ;
 
+//                env=IloEnv() ;
+//                process(Instance, fichier, time, Mob, env) ;
+//                env.end() ;
 
 
                 /*env=IloEnv() ;
@@ -630,17 +585,17 @@ main(int argc,char**argv)
                 process(Instance, fichier, time, IneqPures, env) ;
                 env.end() ;*/
 
-                env=IloEnv() ;
-                process(Instance, fichier, time, DynamicFix , env) ;
-                env.end() ;
+//                env=IloEnv() ;
+//                process(Instance, fichier, time, DynamicFix , env) ;
+//                env.end() ;
 
-                env=IloEnv() ;
-                int solution_fixing = process(Instance, fichier, time, DynamicSubFix , env) ;
-                env.end() ;
+//                env=IloEnv() ;
+//                int solution_fixing = process(Instance, fichier, time, DynamicSubFix , env) ;
+//                env.end() ;
 
-                if (fabs(opt-solution_fixing) > 0.0000001 ) {
-                    fichier << "ERREUR" << endl ;
-                }
+//                if (fabs(opt-solution_fixing) > 0.0000001 ) {
+//                    fichier << "ERREUR" << endl ;
+//                }
 
                 /*env=IloEnv() ;
                 process(Instance, fichier, time, IneqCB, env) ;

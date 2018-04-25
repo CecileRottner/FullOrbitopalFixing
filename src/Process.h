@@ -44,6 +44,7 @@ private:
 
     int useNumU ; //u definie comme variable continue dans le modèle
 
+
     //contraintes
     int CteRamping ;
 
@@ -77,10 +78,10 @@ public:
         doIup = 0 ;
 
         CteRamping = 0 ;
-
         //indicateurs à l'arrache
        // StopNode=10 ;
         allGroups=0 ;
+
 
     }
 

@@ -238,7 +238,6 @@ ILOLAZYCONSTRAINTCALLBACK1(LazyCB, IloInt, fake) {}
 
 int process(InstanceProcessed I, ofstream & fichier, double & time, Methode met, IloEnv env) {
 
-    cout  << "ici" << endl ;
 
     // cout << "ici : " << met.getNum() << endl ;
 
@@ -390,11 +389,10 @@ int process(InstanceProcessed I, ofstream & fichier, double & time, Methode met,
 
 
     //Destructeurs
-   // delete inst ;
-   // delete dataNode ;
+   delete inst ;
+   delete dataNode ;
     // env.end() ;
 
-    cout << "ici" << endl ;
 
     return 1;
 }
@@ -575,6 +573,19 @@ main(int argc,char**argv)
             }
         }
 
+        if (met==4) {
+
+            env=IloEnv() ;
+            process(Instance, fichier, time, RampModel , env) ;
+            env.end() ;
+
+
+            env=IloEnv() ;
+            process(Instance, fichier, time, RampIneqRSU, env) ;
+            env.end() ;
+
+        }
+
         /*env=IloEnv() ;
         process(Instance, fichier, time, IneqPures, env) ;
         env.end() ;
@@ -647,9 +658,7 @@ main(int argc,char**argv)
 
 
                 env=IloEnv() ;
-                cout <<"start ramp model" << endl ;
                 process(Instance, fichier, time, RampModel , env) ;
-                cout <<"end ramp model" << endl ;
                 env.end() ;
 
 

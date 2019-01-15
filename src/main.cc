@@ -408,8 +408,15 @@ main(int argc,char**argv)
     //définition des méthodes de résolution
     Methode DefaultCplex ;
 
+    Methode RampDefaultCplex ;
+    RampDefaultCplex.UseRampConstraints();
+
     Methode CBCplex ;
     CBCplex.CplexCallback(1,1,1,0);
+
+    Methode RampCBCplex ;
+    RampCBCplex.CplexCallback(1,1,1,0);
+    RampCBCplex.UseRampConstraints();
 
     Methode IneqPures;
     IneqPures.UseIneqSum();
@@ -446,7 +453,12 @@ main(int argc,char**argv)
     IneqCB.setNum(0) ;
 
     Methode Mob ;
-    Mob.useMOB() ;
+    Mob.useMOB() ;  
+
+    Methode RampMob ;
+    RampMob.UseRampConstraints();
+    RampMob.useMOB() ;
+    RampMob.setNum(11) ;
 
     Methode StaticFix ;
     StaticFix.UseStaticFixing() ;

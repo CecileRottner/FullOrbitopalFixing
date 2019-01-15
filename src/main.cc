@@ -139,6 +139,7 @@ ILOBRANCHCALLBACK4(BCallBack, Methode &, methode, SubPb &, sub, myNodeData*, dat
                 }
 
                 sub.doFixing(branch, pruneLeft, pruneRight, methode.SubFixing()) ;
+                
 
             }
         }
@@ -317,7 +318,7 @@ int process(InstanceProcessed I, ofstream & fichier, double & time, Methode met,
     //Paramètres
     cplex.setParam(IloCplex::Param::ClockType, 1); //1 : CPU TIME
     cplex.setParam(IloCplex::Param::Threads, 1);
-    cplex.setParam(IloCplex::EpGap, 0.0000001) ;
+    cplex.setParam(IloCplex::EpGap, 0.0000000001) ;
     cplex.setParam(IloCplex::Param::TimeLimit, 3600) ;
 
 

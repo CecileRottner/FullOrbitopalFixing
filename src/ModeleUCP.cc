@@ -116,8 +116,8 @@ IloModel defineModel(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, con
     if (ramp==1) {
         for (i = 0 ; i <n ; i++) {
             for (t = 1 ; t < T ; t++) {
-                model.add(pp[i*T + t] - pp[i*T + t-1] <= (pb->getPmax(i)-pb->getP(i))*x[i*T + t-1]/3 + pb->getP(i)*u[i*T + t] );
-                model.add(pp[i*T + t-1] - pp[i*T + t] <= (pb->getPmax(i)-pb->getP(i))*x[i*T + t]/2 + pb->getP(i)*(u[i*T + t] + x[i*T + t-1] - x[i*T + t] ));
+                model.add(pp[i*T + t] - pp[i*T + t-1] <= (pb->getPmax(i)-pb->getP(i))*x[i*T + t-1]/3  );
+                model.add(pp[i*T + t-1] - pp[i*T + t] <= (pb->getPmax(i)-pb->getP(i))*x[i*T + t]/2 );
             }
         }
     }

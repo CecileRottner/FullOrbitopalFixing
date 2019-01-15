@@ -468,7 +468,7 @@ void SubPb::doFixing(Branching & branch, int & pruneLeft, int & pruneRight, int 
                     nbSubFixs++ ;
                 }
             }
-            if (!pruneSide0 && RSD.SetAtT(t)) {
+            if (!pruneSide0 && !met.Ramping() && RSD.SetAtT(t)) {
                 subprune  = ComputeSubMatrixFixing(branch, left, RSD, t) ;
                 pruneSide0 = pruneSide0 || subprune ;
                 if (subprune) {
@@ -503,7 +503,7 @@ void SubPb::doFixing(Branching & branch, int & pruneLeft, int & pruneRight, int 
                     nbSubFixs++ ;
                 }
             }
-            if (!pruneSide1  && RSD.SetAtT(t)) {
+            if (!pruneSide1 && !met.Ramping()  && RSD.SetAtT(t)) {
                 subprune = ComputeSubMatrixFixing(branch, left, RSD, t) ;
                 pruneSide1 = pruneSide1 || subprune ;
                 if (subprune) {

@@ -489,13 +489,16 @@ void SubPb::updateRSU_RSD() {
             int last_g = LastG[g] ;
             int first_g = FirstG[g] ;
 
+            int previous_unit_added=-1 ; // la dernière unité ajoutée à la sous matrice
+
             for (int i = first_g ; i <= last_g ; i++) {
 
                 ///// RSU
                 if (count_zeros[i] >= instance->getl(i) ) {
                     RSU.setM(i,t,1) ;
                     if (count_zeros[i] == instance->getl(i) ) {
-                        RSU_diff_from_previous_t = 1 ;
+                        RSU_diff_from_previous_t = 1 ;// si toutes les unités de la sous matrice sont prêtes à démarrer en t et en t+1, on ne regarde que la sous matrice correspondant à t.
+                        //les décisions de fixing vaudront bien pour les sous matrices correspondant à t et à t+1
                         ThereIsASetInRSU=1 ;
                     }
                 }
@@ -506,9 +509,25 @@ void SubPb::updateRSU_RSD() {
 
                 ////// RSD
                 if (count_ones[i] >= instance->getL(i) ) {
-                    RSD.setM(i,t,1) ;
+                    int ok=0 ; // ok = 1 si on va ajouté la colonne i à la sous matrice
+                    if (met.Ramping() && previous_unit_added>=0) { // dans ce cas il faut vérifier que previous_unit a demarré pour la derniere fois avant le dernier démarrage de i (ou en même temps)
+                        if (count_ones[previous_unit_added] >= count_ones[i]) {
+                            ok=1 ;
+                        }
+                    }
+                    else {
+                        ok=1 ;
+                    }
+                    if (ok) {
+                        RSD.setM(i,t,1) ;
+                        previous_unit_added=i;
+                    }
+                    else {
+                        RSD.setM(i,t,0) ;
+                    }
                     if (count_ones[i] == instance->getL(i) ) {
-                        RSD_diff_from_previous_t = 1 ;
+                        RSD_diff_from_previous_t = 1 ; // si toutes les unités de la sous matrice sont prêtes à s'éteindre en t et en t+1, on ne regarde que la sous matrice correspondant à t.
+                        //les décisions de fixing vaudront bien pour les sous matrices correspondant à t et à t+1
                         ThereIsASetInRSD=1 ;
                     }
                 }

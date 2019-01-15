@@ -38,18 +38,18 @@ IloModel defineModel(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, con
 
 
     // Conditions initiales
-    for (i=0; i<n; i++) {
-        model.add(u[i*T] >= x[i*T] - pb->getInit(i) ) ;
-    }
+//    for (i=0; i<n; i++) {
+//        model.add(u[i*T] >= x[i*T] - pb->getInit(i) ) ;
+//    }
 
-    for (i=0; i<n; i++) {
-        IloExpr sum(env) ;
-        for (k= 0; k < pb->getl(i) ; k++) {
-            sum += u[i*T + k] ;
-        }
-        model.add(sum <= 1 - pb->getInit(i) ) ;
-        sum.end() ;
-    }
+//    for (i=0; i<n; i++) {
+//        IloExpr sum(env) ;
+//        for (k= 0; k < pb->getl(i) ; k++) {
+//            sum += u[i*T + k] ;
+//        }
+//        model.add(sum <= 1 - pb->getInit(i) ) ;
+//        sum.end() ;
+//    }
 
     // Min up constraints
     for (i=0; i<n; i++) {
@@ -116,7 +116,7 @@ IloModel defineModel(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, con
     if (ramp==1) {
         for (i = 0 ; i <n ; i++) {
             for (t = 1 ; t < T ; t++) {
-                model.add(pp[i*T + t] - pp[i*T + t-1] <= (pb->getPmax(i)-pb->getP(i))*x[i*T + t-1]/3  );
+                model.add(pp[i*T + t] - pp[i*T + t-1] <= (pb->getPmax(i)-pb->getP(i))*x[i*T + t-1]/3 );
                 model.add(pp[i*T + t-1] - pp[i*T + t] <= (pb->getPmax(i)-pb->getP(i))*x[i*T + t]/2 );
             }
         }
@@ -144,6 +144,7 @@ void AddRSUIneq(IloModel & model, IloEnv env, InstanceUCP* pb, const IloBoolVarA
         for (int i=first ; i < last ; i++) {
 
             int l = pb->getl(i) ;
+            int L = pb->getL(i) ;
 
             int ub_j = i+1 ;
             if (methode == -4) {
@@ -164,13 +165,13 @@ void AddRSUIneq(IloModel & model, IloEnv env, InstanceUCP* pb, const IloBoolVarA
                 }
             }
 
-            if (pb->getInit(i)==0) {
+            //if (pb->getInit(i)==0) {
                 for (int j=i+1 ; j <= ub_j ; j++) {
-                    for (int t = 0 ; t < l ; t++) {
+                    for (int t = 0 ; t < L ; t++) {
                         model.add(x[j*T+t] <= x[i*T+t]) ;
                     }
                 }
-            }
+           // }
         }
     }
 }

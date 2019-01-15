@@ -139,7 +139,6 @@ ILOBRANCHCALLBACK4(BCallBack, Methode &, methode, SubPb &, sub, myNodeData*, dat
                 }
 
                 sub.doFixing(branch, pruneLeft, pruneRight, methode.SubFixing()) ;
-                
 
             }
         }
@@ -239,6 +238,7 @@ ILOLAZYCONSTRAINTCALLBACK1(LazyCB, IloInt, fake) {}
 
 int process(InstanceProcessed I, ofstream & fichier, double & time, Methode met, IloEnv env) {
 
+    cout  << "ici" << endl ;
 
     // cout << "ici : " << met.getNum() << endl ;
 
@@ -318,7 +318,7 @@ int process(InstanceProcessed I, ofstream & fichier, double & time, Methode met,
     //Paramètres
     cplex.setParam(IloCplex::Param::ClockType, 1); //1 : CPU TIME
     cplex.setParam(IloCplex::Param::Threads, 1);
-    cplex.setParam(IloCplex::EpGap, 0.0000000001) ;
+    cplex.setParam(IloCplex::EpGap, 0.0000001) ;
     cplex.setParam(IloCplex::Param::TimeLimit, 3600) ;
 
 
@@ -374,9 +374,9 @@ int process(InstanceProcessed I, ofstream & fichier, double & time, Methode met,
     fichier << " & " << cplex.getObjValue()  ; //Optimal value
     fichier << " & " << cplex.getMIPRelativeGap() << " \\% " ; //approx gap
     fichier << " & " << cplex.getNnodes() ;
-    /*fichier << " & " << sub.nbFixs ;
+    fichier << " & " << sub.nbFixs ;
     fichier << " & " << sub.nbSubFixs ;
-    fichier << " & " << sub.timeFix ;*/
+    fichier << " & " << sub.timeFix ;
     fichier << " & " << t - time ;
     /*if (sub.UB_LB) {
         fichier << "        UB_LB     "  ;
@@ -390,10 +390,11 @@ int process(InstanceProcessed I, ofstream & fichier, double & time, Methode met,
 
 
     //Destructeurs
-   delete inst ;
-   delete dataNode ;
+   // delete inst ;
+   // delete dataNode ;
     // env.end() ;
 
+    cout << "ici" << endl ;
 
     return 1;
 }
@@ -491,6 +492,11 @@ main(int argc,char**argv)
     DynamicSubFix.UseSubFixing() ;
     DynamicSubFix.setNum(44);
 
+    Methode DynamicSubFixWithRamps ;
+    DynamicSubFixWithRamps.UseRampConstraints();
+    DynamicSubFixWithRamps.UseDynamicFixing() ;
+    DynamicSubFixWithRamps.UseSubFixing() ;
+    DynamicSubFixWithRamps.setNum(55);
 
     /////////////////////// SI ARGUMENTS //////////////////////
     if (argc>1) {
@@ -575,16 +581,14 @@ main(int argc,char**argv)
         }
 
         if (met==4) {
-
             env=IloEnv() ;
-            process(Instance, fichier, time, RampModel , env) ;
+            process(Instance, fichier, time, RampIneqRSU , env) ;
             env.end() ;
-
-
+        }
+        if (met==5) {
             env=IloEnv() ;
-            process(Instance, fichier, time, RampIneqRSU, env) ;
+            process(Instance, fichier, time, DynamicSubFixWithRamps, env) ;
             env.end() ;
-
         }
 
         /*env=IloEnv() ;
@@ -613,8 +617,6 @@ main(int argc,char**argv)
         process(Instance, fichier, time, StaticFixWithBranching_all, env) ;
         env.end() ; */
 
-        fichier << endl ;
-
 
     }
 
@@ -630,26 +632,26 @@ main(int argc,char**argv)
 
         //Paramètres de l'instance
 
-        int T = 96;
+        int T = 48;
         int n = 60 ;
         int sym = 2 ;
         int demande = 3;
         int cat01 = 0;
         int bloc = 1;
         int intra = 0 ;
-        string localisation = "data/Litt_Real/" ;
+        string localisation = "data/smaller/" ;
         InstanceProcessed Instance = InstanceProcessed(n, T, bloc, demande, sym, cat01, intra, 0, localisation) ;
 
         fichier << localisation << endl ;
         Instance.localisation = localisation ;
 
-        n=30;
-        T=96;
+        n=20;
+        T=24;
         Instance.n=n;
         Instance.T=T ;
         IloEnv env ;
 
-        for (sym= 4; sym >=2 ; sym--) {
+        for (sym= 3; sym >=2 ; sym--) {
             Instance.symetrie = sym ;
 
             for (int id=1; id <=20; id++) {
@@ -659,12 +661,14 @@ main(int argc,char**argv)
 
 
                 env=IloEnv() ;
-                process(Instance, fichier, time, RampModel , env) ;
+                cout <<"start ramp model" << endl ;
+                process(Instance, fichier, time, RampIneqRSU , env) ;
+                cout <<"end ramp model" << endl ;
                 env.end() ;
 
 
                 env=IloEnv() ;
-                process(Instance, fichier, time, RampIneqRSU, env) ;
+                process(Instance, fichier, time, DynamicSubFixWithRamps, env) ;
                 env.end() ;
 
 

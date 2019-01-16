@@ -410,13 +410,16 @@ main(int argc,char**argv)
 
     Methode RampDefaultCplex ;
     RampDefaultCplex.UseRampConstraints();
+    RampDefaultCplex.setNum(-10) ;
 
     Methode CBCplex ;
     CBCplex.CplexCallback(1,1,1,0);
 
+
     Methode RampCBCplex ;
     RampCBCplex.CplexCallback(1,1,1,0);
     RampCBCplex.UseRampConstraints();
+    RampCBCplex.setNum(10) ;
 
     Methode IneqPures;
     IneqPures.UseIneqSum();
@@ -533,75 +536,31 @@ main(int argc,char**argv)
         double time = 0 ;
         IloEnv env ;
 
+        if (met==-1) {
+            env=IloEnv() ;
+            process(Instance, fichier, time, RampDefaultCplex, env) ;
+            env.end() ;
+        }
+
+        if (met==0) {
+            env=IloEnv() ;
+            process(Instance, fichier, time, RampCBCplex, env) ;
+            env.end() ;
+        }
+
         if (met==1) {
-
             env=IloEnv() ;
-            process(Instance, fichier, time, DefaultCplex, env) ;
+            process(Instance, fichier, time, RampMob, env) ;
             env.end() ;
+		}
 
-            env=IloEnv() ;
-            process(Instance, fichier, time, CBCplex, env) ;
-            env.end() ;
-
-            env=IloEnv() ;
-            process(Instance, fichier, time, Mob, env) ;
-            env.end() ;
-
-            env=IloEnv() ;
-            process(Instance, fichier, time, DynamicFix, env) ;
-            env.end() ;
-        }
-
-        if (met==2) {
-            env=IloEnv() ;
-            process(Instance, fichier, time, DefaultCplex, env) ;
-            env.end() ;
-
-            env=IloEnv() ;
-            process(Instance, fichier, time, IneqPures, env) ;
-            env.end() ;
-
-            env=IloEnv() ;
-            process(Instance, fichier, time, StaticFixWithIneq, env) ;
-            env.end() ;
-        }
-
-        if (met==3) {
-
-            env=IloEnv() ;
-            int opt= process(Instance, fichier, time, DefaultCplex , env) ;
-            env.end() ;
-
-            env=IloEnv() ;
-            process(Instance, fichier, time, DynamicFix , env) ;
-            env.end() ;
-
-            env=IloEnv() ;
-            int solution_fixing_static = process(Instance, fichier, time, StaticSubFix , env) ;
-            env.end() ;
-
-            env=IloEnv() ;
-            int solution_fixing = process(Instance, fichier, time, DynamicSubFix , env) ;
-            env.end() ;
-
-            if (fabs(opt-solution_fixing) > 0.0000001 ) {
-                fichier << "ERREUR" << endl ;
-            }
-            if (fabs(opt-solution_fixing_static) > 0.0000001 ) {
-                fichier << "ERREUR" << endl ;
-            }
-        }
-
-        if (met==4) {
-            env=IloEnv() ;
-            process(Instance, fichier, time, RampIneqRSU , env) ;
-            env.end() ;
-        }
         if (met==5) {
             env=IloEnv() ;
             process(Instance, fichier, time, DynamicSubFixWithRamps, env) ;
             env.end() ;
         }
+
+
 
         /*env=IloEnv() ;
         process(Instance, fichier, time, IneqPures, env) ;

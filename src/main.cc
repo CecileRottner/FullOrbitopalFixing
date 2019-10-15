@@ -302,6 +302,7 @@ int process(InstanceProcessed I, ofstream & fichier, double & time, Methode met,
     IloCplex cplex(model) ;
     IloNum eps = cplex.getParam(IloCplex::Param::Simplex::Tolerances::Feasibility) ;
 
+
     SubPb sub = SubPb(env, inst, x, u, eps, met) ;
 
     myNodeData* dataNode ;
@@ -320,6 +321,7 @@ int process(InstanceProcessed I, ofstream & fichier, double & time, Methode met,
     cplex.setParam(IloCplex::Param::Threads, 1);
     cplex.setParam(IloCplex::EpGap, 0.0000001) ;
     cplex.setParam(IloCplex::Param::TimeLimit, 3600) ;
+   //cplex.setParam(IloCplex::Param::Preprocessing::Symmetry,0); //0 : turns off symmtry handling
 
 
     //Résolution et affichage de la solution
@@ -431,8 +433,17 @@ main(int argc,char**argv)
     RampIneqRSU.UseRampConstraints();
     RampIneqRSU.AddIneqRSU() ;
 
+    Methode RampCBIneqRSU;
+    RampCBIneqRSU.UseRampConstraints();
+    RampCBIneqRSU.AddIneqRSU() ;
+    RampCBIneqRSU.CplexCallback(1,1,1,0);
+
     Methode IneqVarY;
     IneqVarY.UseIneqVarY();
+
+    Methode RampIneqVarY;
+    RampIneqVarY.UseIneqVarY();
+    RampIneqVarY.UseRampConstraints();
 
     Methode Flot;
     Flot.UseModeleFlot();
@@ -560,8 +571,23 @@ main(int argc,char**argv)
             env.end() ;
         }
 
+        if (met==30) {
+            env=IloEnv() ;
+            process(Instance, fichier, time, RampIneqRSU, env) ;
+            env.end() ;
+        }        
 
+        if (met==31) {
+            env=IloEnv() ;
+            process(Instance, fichier, time, RampCBIneqRSU, env) ;
+            env.end() ;
+        }
 
+        if (met==40) {
+            env=IloEnv() ;
+            process(Instance, fichier, time, RampIneqVarY, env) ;
+            env.end() ;
+        }
         /*env=IloEnv() ;
         process(Instance, fichier, time, IneqPures, env) ;
         env.end() ;

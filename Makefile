@@ -1,54 +1,71 @@
-#   Makefile C9-1
-#   This should work as a reasonable template for your work
-#   on the project too.
-#   Of course you can remove most of the comments once you
-#   don't need them anymore, the file will be much more readable.
-
-
-#  Global confituration
-
-#  Automatically finds files in 'src' when looking for depandancies:
+SYSTEM     = x86-64_linux
+LIBFORMAT  = static_pic
 
 VPATH += src
 
-
-#  CPLEX configuration
-
-
-#CPLEX_BASE_DIR := /usr/ensta/pack/ro/cplex/x86_64-linux/CPLEX_Studio_126
-
-
-include cplex.mk
-
-#  A list of 'special' targets:
+#------------------------------------------------------------
 #
-#    clean     Remove all the temporary object files (.o)
-#    mrproper  Clean everything, including the executable
-#
-#  You can execute those targets by typing 'make <target>'
-#  (instead of simply 'make') at the command line.
-#
-#  The '.PHONY' target is special and internal to 'make'.
-#  The purpose is that the actions for 'clean', 'doc'
-#  and 'mrproper' are executed even if it happens to
-#  be a file called 'clean', 'doc' or 'mrproper' in
-#  the directory.
-#  See the 'make' documentation for more information
-#  (or google 'makefile PHONY').
+# When you adapt this makefile to compile your CPLEX programs
+# please copy this makefile and set CPLEXDIR and CONCERTDIR to
+# the directories where CPLEX and CONCERT are installed.
+# CPLEXDIR      = /home/rottner/Programmes/Cplex12.8/cplex
+# CONCERTDIR    = /home/rottner/Programmes/Cplex12.8/concert
 
-.PHONY: clean mrproper doc
+#------------------------------------------------------------
 
-#  The list of the object files of the program
-#  This list need to be updated if you add more files
-#  to your program.
+include cplex_dir.mk
+
+# ---------------------------------------------------------------------
+# Compiler selection 
+# ---------------------------------------------------------------------
+
+CCC = g++ -O0
+
+# ---------------------------------------------------------------------
+# Compiler options 
+# ---------------------------------------------------------------------
+
+CCOPT = -m64 -O -fPIC -fno-strict-aliasing -fexceptions -DNDEBUG -DIL_STD
+
+# ---------------------------------------------------------------------
+# Link options and libraries
+# ---------------------------------------------------------------------
+
+CPLEXBINDIR   = $(CPLEXDIR)/bin/$(BINDIST)
+CPLEXJARDIR   = $(CPLEXDIR)/lib/cplex.jar
+CPLEXLIBDIR   = $(CPLEXDIR)/lib/$(SYSTEM)/$(LIBFORMAT)
+CONCERTLIBDIR = $(CONCERTDIR)/lib/$(SYSTEM)/$(LIBFORMAT)
+
+CCLNDIRS  = -L$(CPLEXLIBDIR) -L$(CONCERTLIBDIR)
+CLNDIRS   = -L$(CPLEXLIBDIR)
+CCLNFLAGS = -lconcert -lilocplex -lcplex -lm -lpthread -ldl 
+CLNFLAGS  = -lcplex -lm -lpthread -ldl 
+
+
+CONCERTINCDIR = $(CONCERTDIR)/include
+CPLEXINCDIR   = $(CPLEXDIR)/include
+
+EXDIR         = $(CPLEXDIR)/examples
+EXINC         = $(EXDIR)/include
+EXDATA        = $(EXDIR)/data
+EXSRCCPP      = $(EXDIR)/src/cpp
+
+CFLAGS  = $(COPT)  -I$(CPLEXINCDIR)
+CCFLAGS = $(CCOPT) -I$(CPLEXINCDIR) -I$(CONCERTINCDIR)  -Wno-ignored-attributes
+JCFLAGS = $(JOPT)
+
+
+#------------------------------------------------------------
+#  make all      : to compile the examples. 
+#  make execute  : to compile and execute the examples.
+#------------------------------------------------------------
+
+
+
+# ------------------------------------------------------------
 #
-#  You can generate this list automatically from the
-#  source file in 'src' with the 'wildcard' and
-#  'patsubst' functions we saw in class (or, again,
-#  google 'makefile wildcard' for example), although
-#  I would advise you against it. (In particular
-#  because it can be usefull to compile only a part of your
-#  project when you have build errors.)
+# Obj
+#
 
 OBJ_LIST := InstanceUCP.o \
 	    ModeleUCP.o \
@@ -57,45 +74,32 @@ OBJ_LIST := InstanceUCP.o \
 	    Node.o \
 	    Mob.o \
 	    Fixing.o \
-            Process.o \
+        Process.o \
 	    main.o \
 
-#  The list of the path to the object files: since
-#  all the object files should be in the 'build'
-#  directory, we add the prefix 'build/' to all
-#  the elements in OBJ_LIST.
+OBJ:= $(addprefix build/, $(OBJ_LIST))
 
-OBJ      := $(addprefix build/, $(OBJ_LIST))
 
-#   Name of the program (BIN stands for 'binary')
+
+# ------------------------------------------------------------
+# link
 
 BIN      := mf
 
-#   Compilation and link flags
+$(BIN): $(OBJ)
+	$(CCC) $(CCFLAGS) $(CCLNDIRS) $^ -o $@  $(CCLNFLAGS)
+	#$(CCC) $(CCFLAGS) $(CCLNDIRS) -o $@ $^ $(CCLNFLAGS)
 
-CFLAGS   := -Wall -g
-LDFLAGS  := $(CPLEX_CXX_LDFLAGS)
 
-#   Aliases for functions.
-#   This makes the Makefile a little bit more readable,
-#   and allow to change e.g. the compiler easily.
-
-compile  := g++ $(CFLAGS) $(CPLEX_CXX_CFLAGS) -c
-link     := g++ $(CPLEX_CXX_LDDIRS)
-remove   := rm -f
-
-#   Compilation targets. As in class, except that
-#   we now have separate directory: 'build' for
-#   the object files and 'src' for the source files.
-
-$(BIN):  $(OBJ)
-	@$(link) $^ -o $@  $(LDFLAGS)
+# ------------------------------------------------------------
+# compil
 
 build/%.o: src/%.cc
-	@$(compile) $< -o $@
+	$(CCC) -c $(CCFLAGS) $< -o $@
 
-#   The rules for the 'special' targets discussed
-#   above (clean, mrproper, doc)
+
+# ------------------------------------------------------------
+.PHONY: clean mrproper doc
 
 clean:
 	@$(remove) $(OBJ)
@@ -103,28 +107,9 @@ clean:
 mrproper: clean
 	@$(remove) $(BIN)
 
-#   Finally, the list of the depandancies of the projects.
-#
-#   For small projects, it is not difficult to do this by
-#   hand: for each source file (.cpp), list all the headers
-#   that it includes, directly or indirectly (through another
-#   header).
-#
-#   Of course, this can be done automatically. The simplest
-#   way with modern versions of gcc is to add the '-MP' and
-#   '-MD' options to the compiler: this will create a file
-#   with extension '.d' for each of your source file, that
-#   you can then include (with the 'include' command) in
-#   your makefile.
-#   A more 'traditional' way (which will work with older
-#   compilers) is described here:
-#      http://mad-scientist.net/make/autodep.html
-#   
-#   But for this project, it is certainly less work for
-#   you to just carefully write all your depandancies
-#   by hand.
 
 
+# List of dependencies
 build/InstanceUCP.o   : InstanceUCP.h
 build/ModeleFlot.o : InstanceUCP.h ModeleFlot.h
 build/ModeleUCP.o : InstanceUCP.h ModeleUCP.h
@@ -134,3 +119,7 @@ build/Mob.o : Mob.h Node.h
 build/Fixing.o : Fixing.h Node.h
 build/Process.o : Process.h InstanceUCP.h ModeleUCP.h
 build/main.o      : InstanceUCP.h ModeleUCP.h Node.h Fixing.h Process.h Mob.h
+
+# Local Variables:
+# mode: makefile
+# End:

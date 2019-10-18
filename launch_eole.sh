@@ -3,10 +3,10 @@ rm Results/*
 
 dossier=data/smaller/
 
-n=20
-T=48
 
-  for sym in 2; do
+for n in 20 30 ; do
+for T in 48 96; do
+  for sym in 2 3; do
     for id in {1..20}; do
 	
 	for met in 10 11 30 31 40 41 50 51 60 61 70 71; do
@@ -39,12 +39,10 @@ T=48
         sbatch --exclusive -N 1 --time=12:00:00 --wckey=P11J5:APOGENE script.sh
 
     done
-    printf "\n" >> result.txt
   done
 done
-printf "\n" >> result.txt
-printf "\n" >> result.txt
-
+done
+done
 
 
 

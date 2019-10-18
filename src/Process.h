@@ -44,6 +44,7 @@ private:
 
     int useNumU ; //u definie comme variable continue dans le modèle
 
+    int noCplexSymHandling;
 
     //contraintes
     int CteRamping ;
@@ -77,6 +78,8 @@ public:
         doMob = 0 ;
         doIup = 0 ;
 
+        noCplexSymHandling = 0 ;
+
         CteRamping = 0 ;
         //indicateurs à l'arrache
        // StopNode=10 ;
@@ -103,6 +106,7 @@ public:
 
     void AddIneqRSU() {doRSUOnly=1;}
 
+    void DeactivateCplexSymHandling() {noCplexSymHandling = 1 ;}
 
 
     //Méthodes de résolution
@@ -247,6 +251,7 @@ public:
     int SubFixing() {return doSubFixing;}
     int Ramping() {return CteRamping;}
     int RSUonly() {return doRSUOnly;}
+    int NoCplexSymHandling() {return noCplexSymHandling;}
 
 };
 

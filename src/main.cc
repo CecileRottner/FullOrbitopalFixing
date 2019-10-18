@@ -321,7 +321,9 @@ int process(InstanceProcessed I, ofstream & fichier, double & time, Methode met,
     cplex.setParam(IloCplex::Param::Threads, 1);
     cplex.setParam(IloCplex::EpGap, 0.0000001) ;
     cplex.setParam(IloCplex::Param::TimeLimit, 3600) ;
-   //cplex.setParam(IloCplex::Param::Preprocessing::Symmetry,0); //0 : turns off symmtry handling
+    if (met.NoCplexSymHandling()) {
+        cplex.setParam(IloCplex::Param::Preprocessing::Symmetry,0); //0 : turns off symmtry handling in cplex
+    }
 
 
     //Résolution et affichage de la solution

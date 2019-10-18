@@ -532,7 +532,6 @@ main(int argc,char**argv)
 
     /////////////////////// SI ARGUMENTS //////////////////////
     if (argc>1) {
-        ofstream fichier("result.txt", std::ofstream::out | std::ofstream::app);
 
         int met= atoi(argv[1]);
         string localisation = argv[2] ;
@@ -549,6 +548,12 @@ main(int argc,char**argv)
         int id = atoi(argv[10]);
 
         InstanceProcessed Instance = InstanceProcessed(n, T, bloc, demande, sym, cat01, intra, id, localisation) ;
+
+        string nom = Instance.resultFileName(met) ;
+        const char* file = nom.c_str() ;
+
+        cout << "fichier: " << file << endl ;
+        ofstream fichier(file, std::ofstream::out | std::ofstream::app);
 
         double time = 0 ;
         IloEnv env ;

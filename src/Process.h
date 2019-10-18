@@ -298,7 +298,7 @@ public :
         return fileS ;
     }
 
-
+    string resultFileName(int met) ;
 
 };
 

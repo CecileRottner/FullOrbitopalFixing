@@ -70,3 +70,15 @@ string InstanceProcessed::createName() const {
 
     return s_id ;
 }
+
+
+string InstanceProcessed::resultFileName(int met) {
+
+        string nom = createName() ;
+        string fileI = "Results/" + nom;
+        string file_temp = fileI + "_"  ;
+        string file_temp_2 = file_temp + to_string2(met) ;
+        string fileS = file_temp_2 + ".txt" ;
+        cout << fileS << endl ;
+        return fileS ;
+    }

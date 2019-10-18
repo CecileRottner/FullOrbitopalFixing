@@ -453,6 +453,10 @@ main(int argc,char**argv)
     Methode IneqNumberOfOnes;
     IneqNumberOfOnes.UseNumberOfOnes();
 
+    Methode RampIneqNumberOfOnes;
+    RampIneqNumberOfOnes.UseNumberOfOnes();
+    RampIneqNumberOfOnes.UseRampConstraints();
+
     Methode IneqSumAndVarY;
     IneqSumAndVarY.UseIneqVarY();
     IneqSumAndVarY.UseIneqSum();
@@ -549,30 +553,78 @@ main(int argc,char**argv)
         double time = 0 ;
         IloEnv env ;
 
-        if (met==-1) {
+        //TESTS RAMPS POUR MPB (REVISION 1)
+
+        if (met/10 == 1) {
+            RampDefaultCplex.setNum(met);
+            if (met % 10 > 0) {
+                RampDefaultCplex.DeactivateCplexSymHandling();
+            }
             env=IloEnv() ;
             process(Instance, fichier, time, RampDefaultCplex, env) ;
             env.end() ;
         }
 
-        if (met==0) {
+        if (met/10 == 2) { // Aggregated interval formulation
+            //not implemented here. see SymmetryBreakingInequalities repertory
+        }
+
+        if (met/10 == 3) { // met = 30 ou 31
+            RampIneqNumberOfOnes.setNum(met);
+            if (met % 10 > 0) {
+                RampIneqNumberOfOnes.DeactivateCplexSymHandling();
+            }
             env=IloEnv() ;
-            process(Instance, fichier, time, RampCBCplex, env) ;
+            process(Instance, fichier, time, RampIneqNumberOfOnes, env) ;
             env.end() ;
         }
 
-        if (met==1) {
+        if (met/10 == 4) { // met = 40 ou 41
+            RampIneqVarY.setNum(met);
+            if (met % 10 > 0) {
+                RampIneqVarY.DeactivateCplexSymHandling();
+            }
+            env=IloEnv() ;
+            process(Instance, fichier, time, RampIneqVarY, env) ;
+            env.end() ;
+        }
+
+        if (met/10 == 5) { // met = 50 ou 51
+            RampIneqRSU.setNum(met);
+            if (met % 10 > 0) {
+                RampIneqRSU.DeactivateCplexSymHandling();
+            }
+            env=IloEnv() ;
+            process(Instance, fichier, time, RampIneqRSU, env) ;
+            env.end() ;
+        }
+
+        if (met/10 == 6) {
+            RampMob.setNum(met);
+            if (met % 10 > 0) {
+                RampMob.DeactivateCplexSymHandling();
+            }
             env=IloEnv() ;
             process(Instance, fichier, time, RampMob, env) ;
             env.end() ;
-		}
+        }
 
-        if (met==5) {
+        if (met/10 == 7) {
+            DynamicSubFixWithRamps.setNum(met);
+            if (met % 10 > 0) {
+                DynamicSubFixWithRamps.DeactivateCplexSymHandling();
+            }
             env=IloEnv() ;
             process(Instance, fichier, time, DynamicSubFixWithRamps, env) ;
             env.end() ;
         }
 
+/*        if (met==5) {
+            env=IloEnv() ;
+            process(Instance, fichier, time, DynamicSubFixWithRamps, env) ;
+            env.end() ;
+        }*/
+/*
         if (met==30) {
             env=IloEnv() ;
             process(Instance, fichier, time, RampIneqRSU, env) ;
@@ -583,13 +635,13 @@ main(int argc,char**argv)
             env=IloEnv() ;
             process(Instance, fichier, time, RampCBIneqRSU, env) ;
             env.end() ;
-        }
+        }*/
 
-        if (met==40) {
+/*        if (met==40) {
             env=IloEnv() ;
             process(Instance, fichier, time, RampIneqVarY, env) ;
             env.end() ;
-        }
+        }*/
         /*env=IloEnv() ;
         process(Instance, fichier, time, IneqPures, env) ;
         env.end() ;
@@ -656,6 +708,8 @@ main(int argc,char**argv)
             for (int id=1; id <=20; id++) {
                 Instance.id = id ;
 
+                int metod=11;
+                cout << "method:" << metod/10 << endl ;
 
 
 

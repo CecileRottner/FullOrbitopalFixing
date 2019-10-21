@@ -8,7 +8,7 @@ for T in 48 96; do
 	
 	for met in 10 11 30 31 40 41 50 51 60 61 70 71; do
 	
-		cat ResultsRamp/$n_$T_1_3_$sym_0_0_$id_$met.txt >> resultat.txt
+		cat ResultsRamp/${n}_${T}_1_3_${sym}_0_0_${id}_${met}.txt >> resultat.txt
 	
 	printf "\n" >> resultat.txt
 	done

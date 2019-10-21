@@ -12,6 +12,7 @@ for T in 48 96; do
 	
 	printf "\n" >> resultat.txt
 	done
+	done
   done
 done
 done

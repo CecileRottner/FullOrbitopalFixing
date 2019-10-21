@@ -176,10 +176,10 @@ void AddRSUIneq(IloModel & model, IloEnv env, InstanceUCP* pb, const IloBoolVarA
     }
 }
 
-IloModel defineModel_y(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, const IloBoolVarArray & u) {
+IloModel defineModel_y(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, const IloBoolVarArray & u, int ramp) {
 
 
-    IloModel model = defineModel(env, pb, x, u, 0,0) ;
+    IloModel model = defineModel(env, pb, x, u, 0,ramp) ;
 
 
     int n = pb->getn();
@@ -217,12 +217,12 @@ IloModel defineModel_y(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, c
     return model ;
 }
 
-IloModel defineModel_numberOfOnes(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, const IloBoolVarArray & u) {
+IloModel defineModel_numberOfOnes(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, const IloBoolVarArray & u, int ramp) {
 
     int T = pb->getT() ;
     IloModel model  ;
     int k ;
-    model = defineModel(env, pb, x, u, 0,0) ;
+    model = defineModel(env, pb, x, u, 0, ramp) ;
 
     for (int g=0 ; g < pb->nbG ; g++) {
 
@@ -245,17 +245,17 @@ IloModel defineModel_numberOfOnes(IloEnv env, InstanceUCP* pb, const IloBoolVarA
     return model ;
 }
 
-IloModel defineModel_sum(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, const IloBoolVarArray & u, int methode) {
+IloModel defineModel_sum(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, const IloBoolVarArray & u, int methode, int ramp) {
 
     IloModel model  ;
     int k ;
 
     if (methode==-5) {
-        model = defineModel_y(env, pb, x, u) ;
+        model = defineModel_y(env, pb, x, u, ramp) ;
     }
 
     else{
-        model = defineModel(env, pb, x, u, 0,0) ;
+        model = defineModel(env, pb, x, u, 0,ramp) ;
     }
 
     int T = pb->getT() ;

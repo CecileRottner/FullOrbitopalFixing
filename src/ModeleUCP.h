@@ -11,10 +11,10 @@ IloModel defineModel(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, con
 void AddRSUIneq(IloModel & model, IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, const IloBoolVarArray & u, int methode) ;
 
 
-IloModel defineModel_y(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, const IloBoolVarArray & u) ;
-IloModel defineModel_numberOfOnes(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, const IloBoolVarArray & u) ;
+IloModel defineModel_y(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, const IloBoolVarArray & u, int ramp) ;
+IloModel defineModel_numberOfOnes(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, const IloBoolVarArray & u, int ramp) ;
 
-IloModel defineModel_sum(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, const IloBoolVarArray & u, int methode) ;
+IloModel defineModel_sum(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x, const IloBoolVarArray & u, int methode, int ramp) ;
 IloModel AggregatedModel(IloEnv env, InstanceUCP* pb) ;
 
 

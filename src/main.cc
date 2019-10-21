@@ -266,19 +266,19 @@ int process(InstanceProcessed I, ofstream & fichier, double & time, Methode met,
 
     if (met.IneqVarY()) {
         if (!met.IneqSum()) {
-            model = defineModel_y(env,inst,x,u) ;
+            model = defineModel_y(env,inst,x,u, ramp) ;
         }
         else {
-            model = defineModel_sum(env,inst, x,u, -5) ;
+            model = defineModel_sum(env,inst, x,u, -5, ramp) ;
         }
     }
     else if (met.IneqSum()) {
-        model = defineModel_sum(env,inst, x,u, -3) ;
+        model = defineModel_sum(env,inst, x,u, -3, ramp) ;
 
     }
 
     else if (met.NumberOfOnes()) {
-        model = defineModel_numberOfOnes(env,inst, x,u) ;
+        model = defineModel_numberOfOnes(env,inst, x,u, ramp) ;
     }
 
     else if (met.AggregatedModel()) {

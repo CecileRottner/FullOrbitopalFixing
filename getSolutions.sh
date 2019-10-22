@@ -10,8 +10,9 @@ for T in 48 96; do
 	
 		cat ResultsRamp/${n}_${T}_1_3_${sym}_0_0_${id}_${met}.txt >> resultat.txt
 	
-	printf "\n" >> resultat.txt
 	done
+	
+	printf "\n" >> resultat.txt
 	done
   done
 done

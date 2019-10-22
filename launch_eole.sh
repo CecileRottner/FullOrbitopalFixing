@@ -1,11 +1,11 @@
 #!/bin/bash
 rm Results/*
 
-dossier=data/smaller/
+dossier=data/LittReal/
 
 
-for n in 20 30 ; do
-for T in 48 96; do
+for n in 30 ; do
+for T in 96; do
   for sym in 2 3; do
     for id in {1..20}; do
 	
@@ -78,7 +78,7 @@ for T in 48 96; do
    
 		chmod +x script.sh
 		
-        sbatch --exclusive -N 1 --time=12:00:00 --wckey=P11J5:APOGENE script.sh
+        sbatch --exclusive -N 1 --time=02:00:00 --wckey=P11J5:APOGENE script.sh
 
     done
   done

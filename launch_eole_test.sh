@@ -9,7 +9,7 @@ for T in 48 ; do
   for sym in 2; do
     for id in {1..1}; do
 	
-	for met in 10 11 ; do
+	for met in 60 ; do
 		rm script.sh
 		
 		echo "#!/usr/bin/env bash" >> "\n" >> script.sh

@@ -1,15 +1,15 @@
 #!/bin/bash
 rm Results/*
 
-dossier=data/smaller/
+dossier=data/Litt_Real/
 
 
-for n in 20  ; do
+for n in 60  ; do
 for T in 48 ; do
   for sym in 2; do
     for id in {1..1}; do
 	
-	for met in 60 ; do
+	for met in 10 50 ; do
 		rm script.sh
 		
 		echo "#!/usr/bin/env bash" >> "\n" >> script.sh

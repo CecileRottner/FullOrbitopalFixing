@@ -28,6 +28,29 @@ public:
 };
 //FIN CLASSE
 
+class IntervalModel {
+public:
+    IloEnv env ;
+    InstanceUCP* pb ;
+    Methode met ;
+    int T ;
+    int n ;
+    int Lmin ;
+
+    IntervalModel(IloEnv enviro, InstanceUCP* pb, Methode & m) ;
+
+    double FixedCost(int g, int a, int b) ;
+    int Pindex(int g, int a, int b, int t) ;
+    int Yindex(int g, int a, int b) ;
+    int inUpInterval(int a, int b, int t) ;
+    int inCliqueInterval(int a, int b, int t, int i) ;
+    IloModel defineIntervalModel(IloIntVarArray Y) ;
+
+};
+
+//FIN CLASSE
+
+
 
 
 #endif /* MODELEFLOT_INCLUDED */

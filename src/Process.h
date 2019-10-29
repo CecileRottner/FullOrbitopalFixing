@@ -24,7 +24,10 @@ private:
     int doIneqVarY ;
     int doModeleFlot ;
     int doNumberOfOnes ;
-    int doAggregatedModel ;
+
+    int doAggregatedModel ; // modele Takriti agrégé
+    int doIntervalModel ; //modele interval agrégé
+
     int doDynamicFixing ;
     int doStaticFixing ;
     int doSubFixing ;
@@ -70,6 +73,7 @@ public:
         doModeleFlot =0 ;
         doNumberOfOnes = 0 ;
         doAggregatedModel = 0 ;
+        doIntervalModel = 0 ;
         doStaticFixing = 0;
         doDynamicFixing = 0;
         doSubFixing = 0 ;
@@ -172,6 +176,12 @@ public:
         doAggregatedModel=1 ;
     }
 
+    void UseModeleInterval() {
+        num=-7 ;
+        doCplex=0 ;
+        doIntervalModel = 1 ;
+    }
+
     void UseModeleFlot() { // on peut choisir ou non d'utiliser un lazy callback dans ce cas (même si fixing static en plus)
         num=-7 ;
         doCplex=0 ;
@@ -235,7 +245,10 @@ public:
     int IneqSum() {return doIneqSum;}
     int NumberOfOnes() {return doNumberOfOnes;}
     int IneqVarY() {return doIneqVarY;}
+    
     int AggregatedModel() {return doAggregatedModel;}
+    int ModeleIntervalle() {return doIntervalModel ;}
+
     int ModeleFlot() {return doModeleFlot;}
     int DynamicFixing() {return doDynamicFixing;}
     int StaticFixing() {return doStaticFixing;}

@@ -261,6 +261,12 @@ int process(InstanceProcessed I, ofstream & fichier, double & time, Methode met,
 
     IloModel model ;
 
+    IntervalModel IntModel(env, inst, met);
+
+
+    int Lmin = IntModel.Lmin;
+    IloIntVarArray Y(env,inst->nbG*T*(T-Lmin+1), 0, n) ;
+
     int ramp = met.Ramping();
 
 
@@ -290,12 +296,18 @@ int process(InstanceProcessed I, ofstream & fichier, double & time, Methode met,
         model = flot.AggregatedFlowModel();
     }
 
+    else if (met.ModeleIntervalle()) {
+        model = IntModel.defineIntervalModel(Y) ;
+    }
+
+
     else {
         model = defineModel(env,inst,x,u,met.NumU(), ramp) ;
         if (met.RSUonly()) {
             AddRSUIneq(model, env, inst, x, u,0);
         }
     }
+
 
 
 
@@ -465,6 +477,10 @@ main(int argc,char**argv)
     Methode AggregModel;
     AggregModel.UseAggregatedModel();
 
+    Methode ModeleIntervalleWithRamp ;
+    ModeleIntervalleWithRamp.UseModeleInterval();
+    ModeleIntervalleWithRamp.UseRampConstraints();
+
     Methode IneqCB ;
     IneqCB.UseIneqSum() ;
     IneqCB.UseBranchCB();
@@ -571,7 +587,13 @@ main(int argc,char**argv)
         }
 
         if (met/10 == 2) { // Aggregated interval formulation
-            //not implemented here. see SymmetryBreakingInequalities repertory
+            ModeleIntervalleWithRamp.setNum(met);
+            if (met % 10 > 0) {
+                ModeleIntervalleWithRamp.DeactivateCplexSymHandling();
+            }
+            env=IloEnv() ;
+            process(Instance, fichier, time, ModeleIntervalleWithRamp, env) ;
+            env.end() ;
         }
 
         if (met/10 == 3) { // met = 30 ou 31

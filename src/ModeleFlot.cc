@@ -368,6 +368,7 @@ IloModel ModeleFlot::AggregatedFlowModel() {
 
 
 
+
 IntervalModel::IntervalModel(IloEnv enviro, InstanceUCP* pbm, Methode & m) {
     env=enviro ;
     pb=pbm ;

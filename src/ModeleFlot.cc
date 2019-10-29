@@ -367,3 +367,263 @@ IloModel ModeleFlot::AggregatedFlowModel() {
 }
 
 
+
+IntervalModel::IntervalModel(IloEnv enviro, InstanceUCP* pbm, Methode & m) {
+    env=enviro ;
+    pb=pbm ;
+    met=m ;
+    n = pb->getn();
+    T = pb->getT() ;
+
+    Lmin = pb->getL(0) ;
+    for (int i=1 ; i < n ; i++) {
+        if (pb->getL(i) < Lmin) {
+            Lmin = pb->getL(i) ;
+        }
+    }
+}
+
+double IntervalModel::FixedCost(int g, int a, int b) {
+
+    //    cout << "Fixed cost: intervalle " << a <<", " << b+Lmin-1 << endl ;
+    //    cout << "g="<< g << endl ;
+
+
+    int first = pb->getFirstG(g) ;
+    //    cout << "c0: " <<pb->getc0(first) << endl;
+    //    cout << "cf: " << pb->getcf(first) << endl;
+    double cost = 0 ;
+    if (a>0) {
+        cost += pb->getc0(first) ;
+    }
+    cost += (b+Lmin-a)*pb->getcf(first) ;
+    return cost ;
+}
+
+int IntervalModel::Pindex(int g, int a, int b, int t) {
+    int index = g*(T)*(T - Lmin+1)*T + a*(T-Lmin+1)*T + b*T + t ;
+    return index;
+}
+
+int IntervalModel::Yindex(int g, int a, int b) {
+    int index = g*(T)*(T - Lmin+1) + a*(T-Lmin+1) + b ;
+    return index;
+}
+
+int IntervalModel::inUpInterval(int a, int b, int t) { // renvoie 1 si t appartient à l'intervalle  [a, b+Lmin-1]
+    if (t < a) {
+        return 0 ;
+    }
+    if (t > b+Lmin-1) {
+        return 0 ;
+    }
+    return 1 ;
+}
+
+int IntervalModel::inCliqueInterval(int a, int b, int t, int i) { // renvoie 1 si t appartient à l'intervalle  [a, b+Lmin-1]
+    int l = pb->getl(i) ;
+    if (t < a) {
+        return 0 ;
+    }
+    if (t >= b+Lmin+l) {
+        return 0 ;
+    }
+    return 1 ;
+}
+
+IloModel IntervalModel::defineIntervalModel(IloIntVarArray Y) {
+    cout << "in the model" << endl;
+
+    double Pmaxmax = pb->getPmax(0) ;
+    for (int i=1 ; i < n ; i++) {
+        if (pb->getPmax(i) > Pmaxmax) {
+            Pmaxmax = pb->getPmax(i) ;
+        }
+    }
+
+    int nbG = pb->getnbG() ;
+    //  Y = IloIntVarArray(env, nbG*(T)*(T-Lmin+1), 0, n) ;
+    IloNumVarArray p(env, nbG*(T)*(T-Lmin+1)*T, 0.0, n*Pmaxmax);
+
+
+
+    IloModel model = IloModel(env) ;
+
+
+
+    //Borne sup sur Y et sur P pour chaque groupe. Borne à 0 lorsque l'intervalle est trop petit pour le temps min de marche, où lorsque t est en dehors (pour p).
+    for (int g = 0 ; g < nbG ; g++) {
+
+        int first = pb->getFirstG(g) ;
+        int last = pb->getLastG(g) ;
+        int nb = last-first+1 ;
+
+        int L = pb->getL(first) ;
+
+        for (int a = 0 ; a < T ; a++) {
+            for (int b=0 ; b <= fmin(a + L - Lmin - 1,T-Lmin-1) ; b++) {
+                //                if (b>=a) {
+                //                    cout << "intervalle à zero: [" << a << ", " << b+Lmin-1 << "], L= " << pb->getL(first) << endl;
+                //                }
+                model.add(Y[Yindex(g,a,b)] == 0) ;
+
+                for (int t = 0 ; t < T ; t++) {
+                    model.add(p[Pindex(g,a,b,t)] == 0) ;
+                }
+            }
+
+            for (int b = fmin(a + L - Lmin, T-Lmin) ; b <= T - Lmin ; b++) {
+
+                // Borne Y
+                model.add(Y[Yindex(g,a,b)] <= nb) ;
+
+                //Borne P
+                for (int t = 0 ; t < T ; t++) {
+                    int inside = inUpInterval(a,b,t) ;
+                    if (!inside) {
+                        model.add(p[Pindex(g,a,b,t)] == 0) ;
+                    }
+                    else {
+                        model.add(p[Pindex(g,a,b,t)] <= (pb->getPmax(first) - pb->getP(first)) *Y[Yindex(g,a,b)]) ;
+                    }
+                }
+            }
+        }
+    }
+
+    // Objective Function: Minimize Cost
+    IloExpr cost(env) ;
+
+    for (int g=0; g<nbG; g++) {
+
+        int i = pb->getFirstG(g) ;
+
+        for (int a = 0 ; a < T ; a++) {
+            for (int b =0 ; b < T - Lmin + 1 ; b++) {
+
+                cost += FixedCost(g,a,b)*Y[Yindex(g,a,b)] ;
+
+                for (int t=0 ; t < T ; t++) {
+                    int inside= inUpInterval(a,b,t) ;
+                    if (inside) {
+                        cost += (p[Pindex(g,a,b,t)] + pb->getP(i)*Y[Yindex(g,a,b)] )*(pb->getcp(i)) ;
+                    }
+                }
+                //cout << "production cost of g="<< g << " for [" << a << ", " << b+Lmin-1 <<"] : " << pb->getP(i)*pb->getcp(i) << endl ;
+            }
+        }
+    }
+
+    model.add(IloMinimize(env, cost));
+
+    // Demand constraints
+    for (int t = 0 ; t < T ; t++) {
+        IloExpr Prod(env) ;
+
+        for (int g=0; g<nbG; g++) {
+
+            int i = pb->getFirstG(g) ;
+
+            for (int a = 0 ; a < T ; a++) {
+                for (int b =0 ; b < T - Lmin + 1 ; b++) {
+                    int inside = inUpInterval(a,b,t) ;
+                    if (inside) {
+                        Prod += p[Pindex(g,a,b,t)] + pb->getP(i)*Y[Yindex(g,a,b)];
+                    }
+                }
+            }
+        }
+
+        model.add(pb->getD(t) <= Prod);
+        Prod.end() ;
+    }
+
+
+    //Ramp constraints
+
+    if (met.Ramping()) {
+        for (int g=0; g<nbG; g++) {
+            int i = pb->getFirstG(g) ;
+            int SU = 0 ;
+            double RU = (pb->getPmax(i)-pb->getP(i))/3;
+            double RD = (pb->getPmax(i)-pb->getP(i))/2 ;
+
+            for (int a = 0 ; a < T ; a++) {
+                for (int b = 0 ; b < T - Lmin + 1 ; b++) {
+
+                    if (a > 0) {
+                        model.add(p[Pindex(g,a,b,a)] <= SU*Y[Yindex(g,a,b)] ) ;
+                    }
+                    if (b+Lmin-1 < T-1) {
+                        model.add(p[Pindex(g,a,b,b+Lmin-1)] <= SU*Y[Yindex(g,a,b)] ) ;
+                    }
+
+                    for (int t=a+1 ; t < b+Lmin ; t++) {
+                        model.add( p[Pindex(g,a,b,t)] - p[Pindex(g,a,b,t-1)] <= RU*Y[Yindex(g,a,b)] ) ;
+                        model.add( p[Pindex(g,a,b,t-1)] - p[Pindex(g,a,b,t)] <= RD*Y[Yindex(g,a,b)] ) ;
+                    }
+                }
+            }
+        }
+    }
+
+    // Contrainte de clique
+    for (int t = 0 ; t < T ; t++) {
+        for (int g=0; g<nbG; g++) {
+
+            IloExpr SumY(env) ;
+            int i = pb->getFirstG(g) ;
+            int j = pb->getLastG(g) ;
+            int nb = j-i+1 ;
+            int L = pb->getL(i) ;
+
+            // cout << "Clique t=" << t << ", "<< "l= " << pb->getl(i) << " " ;
+
+            for (int a = 0 ; a < T ; a++) {
+                for (int b =fmin(a+L-Lmin, T-Lmin) ; b < T - Lmin + 1 ; b++) {
+                    int inClique = inCliqueInterval(a,b,t,i) ;
+                    if (inClique) {
+                        // cout << " [" << a << ", " << b+Lmin-1 << "]"<< endl;
+                        SumY += Y[Yindex(g,a,b)] ;
+                    }
+                }
+            }
+
+            model.add(SumY <= nb) ;
+            SumY.end() ;
+        }
+    }
+
+    //    IloCplex cplex(model) ;
+    //    cplex.solve();
+    //    IloNumArray ysol(env,0) ;
+    //    IloNumArray psol(env, 0) ;
+    //    cplex.getValues(Y, ysol) ;
+    //    cplex.getValues(p, psol) ;
+
+    //    for (int g = 0 ; g < nbG ; g++) {
+    //        for (int a = 0 ; a < T ; a++) {
+    //            for (int b =0 ; b < T - Lmin + 1 ; b++) {
+    //                if ( ysol[Yindex(g,a,b)] > 0.99999) {
+    //                    cout << "Groupe " << g << ", intervalle [" << a+1 << ", " << b+Lmin << "] ; y = " << ysol[Yindex(g,a,b)] << endl ;
+    //                    cout << "Power: " ;
+    //                    for (int t=a ; t < b+ Lmin ; t++) {
+    //                        cout << psol[Pindex(g,a,b,t)] << " ";
+    //                    }
+    //                    cout << endl ;
+    //                    cout << "Fixed cost: " << FixedCost(g,a,b) << endl ;
+    //                    cout << endl ;
+    //                }
+    //            }
+    //        }
+    //    }
+
+
+    //    cout << "obj value: " << cplex.getObjValue() << endl ;
+
+
+    cout << "out the model" << endl;
+
+    return model;
+}
+

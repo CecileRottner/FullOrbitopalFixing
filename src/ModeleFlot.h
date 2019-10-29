@@ -4,6 +4,7 @@
 #include <ilcplex/ilocplex.h>
 
 #include "InstanceUCP.h"
+#include "Process.h"
 
 
 class ModeleFlot {

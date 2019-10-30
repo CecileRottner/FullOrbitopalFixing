@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-./mf 10 data/Litt_Real/ 60 48 1 3 2 0 0 15
+./mf 21 data/smaller/ 30 48 1 3 3 0 0 20

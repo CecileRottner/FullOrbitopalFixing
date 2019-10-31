@@ -269,10 +269,26 @@ IloModel defineModel_sum(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x,
 
         for (int i=first ; i <= last ; i++) {
 
+            int ub_j = i+1 ;
+            if (methode == -4) {
+                ub_j=last ;
+            }
+
             int l = pb->getl(i) ;
             int L = pb->getL(i) ;
 
+
+
             if (i < last) {
+
+                //initialisation
+                for (int j=i+1 ; j <= ub_j ; j++) {
+                    for (int t = 0 ; t < fmax(l,L) ; t++) {
+                        model.add(x[j*T+t] <= x[i*T+t]) ;
+                    }
+                }
+
+
                 for (int t = l ; t < T ; t++) {
 
                     IloExpr rhs(env) ;
@@ -297,18 +313,22 @@ IloModel defineModel_sum(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x,
                                                         }*/
                     }
 
-                    int ub_j = i+1 ;
-                    if (methode == -4) {
-                        ub_j=last ;
-                    }
+
 
                     for (int j=i+1 ; j <= ub_j ; j++) {
                         model.add(u[j*T + t] <= rhs) ;
                     }
                 }
+
+
             }
 
             if (i>first) {
+
+                int lb_j = i-1 ;
+                if (methode == -4) {
+                    lb_j=first ;
+                }
 
                 for (int t = L ; t < T ; t++) {
 
@@ -328,10 +348,7 @@ IloModel defineModel_sum(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x,
                         }
                     }
 
-                    int lb_j = i-1 ;
-                    if (methode == -4) {
-                        lb_j=first ;
-                    }
+
                     for (int j=i-1 ; j >= lb_j ; j--) {
                         model.add(x[j*T + t-1] - x[j*T+t] + u[j*T + t] <= rhs_w) ;
                     }

@@ -477,6 +477,10 @@ main(int argc,char**argv)
     Methode AggregModel;
     AggregModel.UseAggregatedModel();
 
+    Methode ModeleIntervalleNoRamp ;
+    ModeleIntervalleNoRamp.UseModeleInterval();
+
+
     Methode ModeleIntervalleWithRamp ;
     ModeleIntervalleWithRamp.UseModeleInterval();
     ModeleIntervalleWithRamp.UseRampConstraints();
@@ -569,10 +573,34 @@ main(int argc,char**argv)
         const char* file = nom.c_str() ;
 
         cout << "fichier: " << file << endl ;
-        ofstream fichier(file, std::ofstream::out | std::ofstream::app);
+        //ofstream fichier(file, std::ofstream::out | std::ofstream::app);
+        ofstream fichier("result.txt", std::ofstream::out | std::ofstream::app);
 
         double time = 0 ;
         IloEnv env ;
+
+        // TESTS NO-RAMPS POUR MPB
+
+
+        if (met/10 == 10) {
+            DefaultCplex.setNum(met);
+            if (met % 10 > 0) {
+                DefaultCplex.DeactivateCplexSymHandling();
+            }
+            env=IloEnv() ;
+            process(Instance, fichier, time, DefaultCplex, env) ;
+            env.end() ;
+        }
+
+        if (met/10 == 30) { // met = 300 ou 301
+            IneqPures.setNum(met);
+            if (met % 100 > 0) {
+                IneqPures.DeactivateCplexSymHandling();
+            }
+            env=IloEnv() ;
+            process(Instance, fichier, time, IneqPures, env) ;
+            env.end() ;
+        }
 
         //TESTS RAMPS POUR MPB (REVISION 1)
 

@@ -4,3 +4,4 @@ cplex_dir.mk
 result.txt
 src/main.cc~
 Results/*
+script.sh

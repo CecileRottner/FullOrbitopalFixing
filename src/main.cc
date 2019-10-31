@@ -573,8 +573,8 @@ main(int argc,char**argv)
         const char* file = nom.c_str() ;
 
         cout << "fichier: " << file << endl ;
-        //ofstream fichier(file, std::ofstream::out | std::ofstream::app);
-        ofstream fichier("result.txt", std::ofstream::out | std::ofstream::app);
+        ofstream fichier(file, std::ofstream::out | std::ofstream::app);
+        //ofstream fichier("result.txt", std::ofstream::out | std::ofstream::app);
 
         double time = 0 ;
         IloEnv env ;

@@ -592,13 +592,67 @@ main(int argc,char**argv)
             env.end() ;
         }
 
+        if (met/10 == 15) { //150 ou 151 pour l'agregation de F(x,u)
+            AggregModel.setNum(met);
+            if (met % 10 > 0) {
+                AggregModel.DeactivateCplexSymHandling();
+            }
+            env=IloEnv() ;
+            process(Instance, fichier, time, AggregModel, env) ;
+            env.end() ;
+        }
+
+        if (met/10 == 20) {
+            ModeleIntervalleNoRamp.setNum(met);
+            if (met % 10 > 0) {
+                ModeleIntervalleNoRamp.DeactivateCplexSymHandling();
+            }
+            env=IloEnv() ;
+            process(Instance, fichier, time, ModeleIntervalleNoRamp, env) ;
+            env.end() ;
+        }
+
         if (met/10 == 30) { // met = 300 ou 301
+            IneqNumberOfOnes.setNum(met);
+            if (met % 100 > 0) {
+                IneqNumberOfOnes.DeactivateCplexSymHandling();
+            }
+            env=IloEnv() ;
+            process(Instance, fichier, time, IneqNumberOfOnes, env) ;
+            env.end() ;
+        }
+
+        if (met/10 == 40) { // met = 400 ou 401
+            IneqVarY.setNum(met);
+            if (met % 100 > 0) {
+                IneqVarY.DeactivateCplexSymHandling();
+            }
+            env=IloEnv() ;
+            process(Instance, fichier, time, IneqVarY, env) ;
+            env.end() ;
+        }
+
+        if (met/10 == 50) { // met = 500 ou 501
             IneqPures.setNum(met);
             if (met % 100 > 0) {
                 IneqPures.DeactivateCplexSymHandling();
             }
             env=IloEnv() ;
             process(Instance, fichier, time, IneqPures, env) ;
+            env.end() ;
+        }
+
+        if (met/10 == 60) { // met = 600 
+            Mob.setNum(met);
+            env=IloEnv() ;
+            process(Instance, fichier, time, Mob, env) ;
+            env.end() ;
+        }
+
+        if (met/10 == 70) { // met = 700 
+            DynamicSubFix.setNum(met);
+            env=IloEnv() ;
+            process(Instance, fichier, time, DynamicSubFix, env) ;
             env.end() ;
         }
 

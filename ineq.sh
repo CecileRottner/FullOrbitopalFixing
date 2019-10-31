@@ -4,12 +4,12 @@ rm result.txt
 dossier=data/smaller/
 
 n=20
-T=96
+T=48
 
   for sym in 2; do
     for id in {1..20}; do
 	
-	for met in 100 300; do
+	for met in 100 150 200 300 400 500 600 700 ; do
       ./mf $met $dossier $n $T 1 3 $sym 0 0 $id
     done
     printf "\n" >> result.txt

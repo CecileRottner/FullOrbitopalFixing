@@ -401,7 +401,7 @@ IloModel AggregatedModel(IloEnv env, InstanceUCP* pb) {
 
 
     // Conditions initiales
-    for (int g=0; g<nbG; g++) {
+/*    for (int g=0; g<nbG; g++) {
         int i = pb->getFirstG(g) ;
         model.add(uu[g*T] >= xx[g*T] - pb->getSizeG(g)*pb->getInit(i) ) ;
     }
@@ -414,7 +414,7 @@ IloModel AggregatedModel(IloEnv env, InstanceUCP* pb) {
         }
         model.add(sum <= pb->getSizeG(g) *(1 - pb->getInit(i) ) );
         sum.end() ;
-    }
+    }*/
 
     // Min up constraints
     for (int g=0; g<nbG; g++) {

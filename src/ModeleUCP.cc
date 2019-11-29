@@ -166,11 +166,11 @@ void AddRSUIneq(IloModel & model, IloEnv env, InstanceUCP* pb, const IloBoolVarA
             }
 
             //if (pb->getInit(i)==0) {
-                for (int j=i+1 ; j <= ub_j ; j++) {
+/*                for (int j=i+1 ; j <= ub_j ; j++) {
                     for (int t = 0 ; t < L ; t++) {
                         model.add(x[j*T+t] <= x[i*T+t]) ;
                     }
-                }
+                }*/
            // }
         }
     }

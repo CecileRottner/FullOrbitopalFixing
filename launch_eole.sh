@@ -1,17 +1,17 @@
 #!/bin/bash
 
 
-dossier=data/Litt_Real/
+dossier=data/newdata/
 
 #sym=2, id=6, met=10
 #sym=3, id= 2 13 15 16 17 18 19 20, met=10 11 50 51
 
-for n in 30 ; do
+for n in 60 ; do
 for T in 96 ; do
-  for sym in 2 3 ; do
+  for sym in 2 3 4 ; do
     for id in {1..20}; do
 	
-	for met in 20 21  ; do
+	for met in 500  ; do
 		rm script.sh
 		
 		echo "#!/usr/bin/env bash" >> "\n" >> script.sh

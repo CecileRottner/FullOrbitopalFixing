@@ -6,7 +6,7 @@ for T in 48 96; do
   for sym in 2 3 4; do
     for id in {1..20}; do
 	
-	for met in 100 101 150 151 200 201 300 301 400 401 500 501 600 700; do
+	for met in 500 502; do
 	
 		fichier=ResultsNoRamp/${n}_${T}_1_3_${sym}_0_0_${id}_${met}.txt
 		

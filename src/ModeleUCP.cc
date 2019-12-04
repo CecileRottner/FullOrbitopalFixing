@@ -281,12 +281,12 @@ IloModel defineModel_sum(IloEnv env, InstanceUCP* pb, const IloBoolVarArray & x,
 
             if (i < last) {
 
-                //initialisation
+/*                //initialisation
                 for (int j=i+1 ; j <= ub_j ; j++) {
                     for (int t = 0 ; t < fmax(l,L) ; t++) {
                         model.add(x[j*T+t] <= x[i*T+t]) ;
                     }
-                }
+                }*/
 
 
                 for (int t = l ; t < T ; t++) {

@@ -11,7 +11,7 @@ for T in 48 ; do
   for sym in 2 3 4 ; do
     for id in {1..20}; do
 	
-	for met in 500  ; do
+	for met in 500 501 ; do
 		rm script.sh
 		
 		echo "#!/usr/bin/env bash" >> "\n" >> script.sh

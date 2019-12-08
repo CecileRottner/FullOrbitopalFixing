@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 rm resultat.txt
 
-for n in 60 ; do
-for T in 48 96; do
+for n in 20 30 60 ; do
+for T in 48 96 ; do
   for sym in 2 3 4; do
     for id in {1..20}; do
 	

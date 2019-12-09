@@ -9,9 +9,9 @@ dossier=data/Litt_Real/
 for n in 60; do
 for T in 48; do
   for sym in 4 ; do
-    for id in 6 7 8 18; do
+    for id in 11 13 14 15 16 17; do
 	
-	for met in 501 ; do
+	for met in 53 ; do
 		rm script.sh
 		
 		echo "#!/usr/bin/env bash" >> "\n" >> script.sh

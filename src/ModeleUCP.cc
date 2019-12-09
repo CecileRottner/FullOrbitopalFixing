@@ -151,17 +151,32 @@ void AddRSUIneq(IloModel & model, IloEnv env, InstanceUCP* pb, const IloBoolVarA
                 ub_j=last ;
             }
 
-            for (int t = l ; t < T ; t++) {
+            for (int t = 2 ; t < T ; t++) {
 
-                IloExpr rhs(env) ;
-                rhs += x[i*T+t] + x[i*T+t - l];
+                if (t >= l) {
+                    IloExpr rhs(env) ;
+                    rhs += x[i*T+t] + x[i*T+t - l];
 
-                for (int k=t -l + 1 ; k < t ; k++) {
-                    rhs+= u[i*T+k] ;
+                    for (int k=t -l + 1 ; k < t ; k++) {
+                        rhs+= u[i*T+k] ;
+                    }
+
+                    for (int j=i+1 ; j <= ub_j ; j++) {
+                        model.add(u[j*T + t] <= rhs) ;
+                    }
                 }
 
-                for (int j=i+1 ; j <= ub_j ; j++) {
-                    model.add(u[j*T + t] <= rhs) ;
+                else {
+                    IloExpr rhs(env) ;
+                    rhs += x[i*T+t] + x[i*T];
+
+                    for (int k=1 ; k < t ; k++) {
+                        rhs+= u[i*T+k] ;
+                    }
+
+                    for (int j=i+1 ; j <= ub_j ; j++) {
+                        model.add(u[j*T + t] <= rhs) ;
+                    }
                 }
             }
 
